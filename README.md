@@ -1,36 +1,41 @@
-# 🚗 JeepBot — Triton AI | Team 01
+# 🚗 JeepBot — ECE/MAE 148 | Team 02
 
-> A small autonomous ground vehicle built on a modified electric jeep platform, designed for environmental data collection and development of an automated garden system (AI-AGE / AGS).
+> A PowerWheels Jeep retrofitted with VESCs, a Raspberry Pi 5, dual OAK-D cameras, LiDAR, and GPS — built as a platform for autonomous robotics development.  
+> **UC San Diego — Jacobs School of Engineering | March 2026**
+
+📄 [Final Presentation (PDF)](docs/ECE_MAE_148_Project_Final_Presentation.pdf)
 
 ---
 
-## ⚠️ Current Status: Non-Operational
+## ⚠️ Current Status
 
-The robot is **fully assembled mechanically** but not yet operational due to hardware and software integration issues.
+The robot is **mechanically complete and wired**, but not yet driving. Hardware integration is largely done — the main gap is software (Pi ↔ VESC CAN control) and a few outstanding hardware issues.
 
 | Area | Status |
 |---|---|
-| Mechanical assembly | ✅ Complete |
-| Drive VESCs (×4) | ✅ Configured & tested |
-| CAN bus (VESC-to-VESC) | ✅ Working |
-| Raspberry Pi mounted | ✅ Installed |
-| Robot movement | ❌ Not working |
+| All wiring (CAN, power, DC-DC) | ✅ Complete |
+| PDB with fuses | ✅ Working |
+| VESCs — CAN addressed & configured with motors | ✅ Done |
+| Hall encoders — mounted & plugged into VESCs | ✅ Done |
+| Raspberry Pi — flashed with firmware | ✅ Done |
+| Sensor mounts (LiDAR, cameras, Pi) | ✅ Done |
+| Robot movement | ❌ Not working — no code pushed to run VESCs via CAN |
 | CAN (Pi ↔ VESC) | ❌ Not implemented |
-| Steering encoder | ❌ Not connected / incompatible |
-| Antispark switch | ❌ Broken (unsafe) |
+| Antispark switch | ❌ Broken — allows power passthrough even when off (fire hazard) |
+| LiDAR power | ❌ Pops 5A 24V fuse on PDB when plugged in (cause unknown) |
+| Steering encoder | ❌ Not compatible with VESC — needs to connect directly to Pi |
 | Emergency stop | ❌ Not connected |
-| LiDAR power | ❌ PDB fuse issue |
-| Cameras (USB) | ❌ Not connected to hub |
 | GPS | ❌ Not installed |
-| Software (Pi) | ❌ Incomplete / reflashed |
+| CAN wires | ⚠️ Fragile — bending at JST connectors causes breaks |
+| Battery placement | ⚠️ Needs to be in driver compartment — no space currently |
 
-### 🔴 Blocking Issues
-1. Broken antispark switch → system powers on unsafely
-2. No emergency stop connected → no safe shutdown
-3. No CAN communication from Raspberry Pi to VESCs
-4. Steering encoder not connected / incompatible with VESC
-5. LiDAR power failure (PDB fuse / connector)
-6. Critical 5V and USB connections incomplete
+### 🔴 Remaining Blockers
+1. Antispark switch allows power passthrough when off — fire hazard, needs replacement
+2. No working emergency stop
+3. LiDAR pops the 5A 24V fuse — root cause unknown
+4. No CAN communication code from Pi to VESCs
+5. Steering encoder (AS5600) is incompatible with VESC — must wire directly to Pi instead
+6. Battery needs a dedicated compartment (driver seat area)
 
 ---
 
@@ -41,10 +46,13 @@ User (RC Controller)
   → Radio Receiver
     → Raspberry Pi 5
       → CAN Bus (via CAN HAT)
-        → VESC 1–4 (drive motors)
-        → VESC 5 (steering)
+          → VESC 1 (Back Left)
+          → VESC 2 (Back Right)
+          → VESC 3 (Front Left)
+          → VESC 4 (Front Right)
+          → VESC 5 (Steering)
 
-Sensors (Cameras, LiDAR, GPS, Encoders)
+Sensors (OAK-D Cameras, LiDAR, GPS, Encoders)
   → Raspberry Pi 5
     → Data Processing / Logging
 ```
@@ -60,21 +68,21 @@ Sensors (Cameras, LiDAR, GPS, Encoders)
 
 ```
 24V Lead-Acid Battery (7Ah)
-  → Antispark Switch  ⚠️ BROKEN
+  → Antispark Switch  ⚠️ BROKEN — replace before use
     → Power Distribution Board (PDB)
-      ├── VESC 1–5 (24V direct)
-      ├── 24V→5V DC-DC → Raspberry Pi, USB Hub, Radio Receiver, Cameras
-      └── 24V→12V DC-DC → LiDAR  ⚠️ FUSE ISSUE
+        ├── VESC 1–5 (24V direct)
+        ├── 24V→5V DC-DC → Raspberry Pi, USB Hub, Radio Receiver, OAK-D Cameras
+        └── 24V→12V DC-DC → LiDAR  ⚠️ POPS FUSE — cause unknown
 ```
 
 | Wire Gauge | Used For |
 |---|---|
-| 10 AWG | Battery & high-current lines |
+| 10 AWG | Battery & high-current power lines |
 | 12 AWG | Motor wiring |
 | 14–16 AWG | 5V electronics |
 | 24 AWG | CAN bus |
 
-**Connectors:** XT90 (battery), XT60 (distribution / DC-DC)
+**Connectors:** XT90 (battery / antispark / PDB input), XT60 (VESCs / DC-DC converters)
 
 ---
 
@@ -88,11 +96,11 @@ Sensors (Cameras, LiDAR, GPS, Encoders)
 | VESC 4 | Front Right wheel |
 | VESC 5 | Steering motor |
 
-- **CAN bus** daisy-chains all VESCs → CAN HAT on Raspberry Pi
+- **CAN bus** daisy-chains all VESCs (5-connector JST chain) → CAN HAT on Raspberry Pi
 - CAN High = Yellow wire, CAN Low = Green wire
-- Each drive motor has a **Hall-effect encoder** (8-pin, 4 active pins)
-- Steering uses **AS5600 Magnetic Absolute Encoder** (I2C) — *not yet integrated*
-- Steering PID: P/I/D = TBD (tuning phase)
+- ⚠️ CAN JST connectors are fragile — avoid sharp bends at the connector
+- Each drive motor has a **Hall-effect encoder** plugged directly into its VESC
+- Steering uses **AS5600 Magnetic Absolute Encoder** — must plug directly to Pi (not VESC)
 
 ---
 
@@ -100,66 +108,64 @@ Sensors (Cameras, LiDAR, GPS, Encoders)
 
 | Sensor | Interface | Status |
 |---|---|---|
-| OAK-D Camera (front) | USB | Mounted, not connected |
-| OAK-D Camera (rear) | USB | Mounted, not connected |
-| LiDAR | Ethernet (12V power) | Installed, no power |
+| OAK-D Camera (front) | USB | Mounted — needs longer USB cable to reach hub |
+| OAK-D Camera (rear) | USB | Mounted — not connected to hub |
+| LiDAR | Ethernet (12V power) | Mounted — pops PDB fuse when plugged in |
 | GPS module | USB | Not installed |
-| Hall encoders (×4) | VESC direct | ✅ Working |
-| AS5600 Steering encoder | I2C | Not connected |
+| Hall encoders (×4) | VESC direct | ✅ Mounted & working |
+| AS5600 Steering encoder | Direct to Pi (I2C) | Mounted — not yet connected to Pi |
 
 ---
 
 ## 🖥️ Software & Control
 
-**Platform:** Raspberry Pi 5 running Linux  
-**Access:** SSH or NoMachine
+**Platform:** Raspberry Pi 5  
+**Access:** SSH or NoMachine  
+**Pi firmware:** Flashed ✅ — peripherals not yet configured
 
-**Control flow (planned):**
+**Intended control flow:**
 ```
 RC Controller → Receiver → Raspberry Pi → CAN → VESCs → Motors
 ```
 
-**Teleoperation methods:**
-
-| Method | Path | Status |
-|---|---|---|
-| RC Controller | RC → Receiver → Pi → CAN → VESC | Primary (incomplete) |
-| ROS2 | Laptop → WiFi → Pi → CAN → VESC | Planned |
-| Web Dashboard | Browser → WiFi → Pi | Optional |
-
-**Future development:** autonomous navigation, sensor fusion, obstacle detection, path planning.
+**Next software steps:**
+- Interface all VESCs via CAN from the Pi
+- Set up OAK-D cameras and LiDAR with the Pi
+- Implement RC controller input → motor commands pipeline
+- Eventually: DonkeyCar / autonomous navigation
 
 ---
 
 ## 🔩 Mechanical Mounts
 
-All mounts are custom 3D-printed. Full CAD + installation guide:  
+All mounts are custom 3D-printed with heat-set inserts. Full CAD + installation guide:  
 📄 [Complete Mounts Documentation (PDF)](https://drive.google.com/file/d/1jBLu-lDB1_-cbu3ugVZViqdFXvc3JRHq/view?usp=sharing)
 
 | Mount | Description |
 |---|---|
 | Front camera mount | Forward-facing OAK-D, aligned to drive direction |
 | Rear camera (bar mount) | Clamp-based attachment to structural bar |
-| Rear camera (ridge mount) | Higher position on trunk for rear perception |
+| Rear camera (ridge mount) | Higher trunk position for rear perception |
 | LiDAR mount | Top-mounted for 360° scanning |
+| Raspberry Pi mount | Custom enclosure for secure chassis mounting |
 
 ---
 
 ## 🛠️ Setup Guide *(Work in Progress)*
 
-> ⚠️ The system is not fully operational. These steps reflect the current partial workflow.
-
-**Before anything:** the antispark switch is broken — the system powers on immediately when the battery is connected. Use extreme caution.
+> ⚠️ Do not connect the battery without reading this first. The antispark switch is broken — the system powers on immediately. Treat every connection as live.
 
 **Steps needed before full operation:**
 - [ ] Replace antispark switch
-- [ ] Fix PDB fuse, restore LiDAR power line
-- [ ] Connect 5V DC-DC output to Raspberry Pi and USB hub
-- [ ] Finish CAN wiring to Raspberry Pi CAN HAT terminal
-- [ ] Connect cameras to powered USB hub (front needs longer cable)
-- [ ] Integrate steering encoder (may need different encoder or adapter)
-- [ ] Install and verify software on Raspberry Pi
-- [ ] Implement RC → Pi → VESC control scripts
+- [ ] Diagnose and fix LiDAR fuse issue (5A 24V rail on PDB)
+- [ ] Get longer USB cables for front camera, LiDAR, and Pi/USB hub
+- [ ] Connect cameras to powered USB hub
+- [ ] Wire AS5600 steering encoder directly to Raspberry Pi (I2C)
+- [ ] Connect emergency stop system
+- [ ] Find battery placement solution (driver compartment area)
+- [ ] Implement CAN control code on Pi (Pi → all 5 VESCs)
+- [ ] Configure OAK-D cameras and LiDAR in software
+- [ ] Install GPS module
 
 **Connecting to the Pi:**
 ```bash
@@ -168,76 +174,93 @@ ssh <user>@<pi-ip>       # or use NoMachine
 
 ---
 
+## 🔨 Hardware Task Reference *(for students picking this up)*
+
+Complete list of hardware tasks performed by the original team — useful if redoing or extending any part of the build:
+
+- Redo soldering on drive motors using 12 AWG silicone wire
+- Create 5-connector CAN daisy chain using JST crimps
+- Crimp JST encoder connectors to VESCs
+- Solder MR60 connectors to all motors and VESCs
+- 3D print mounts and install heat-set inserts
+- Solder XT60 connectors to VESCs, PDB, 5V buck, and 12V buck
+- Solder XT90 connectors to battery cables, antispark, and PDB input
+- Crimp blade connectors to battery cables
+- Solder blade fuse sockets to PDB and insert fuses
+- Solder cables in/out of 12V and 5V buck converters
+- Solder 2× USB-C cables to XT30/60 connector on 5V buck
+
+---
+
 ## 🧯 Troubleshooting
 
 <details>
 <summary><strong>Robot not moving</strong></summary>
 
-- Verify Raspberry Pi is powered and accessible
-- Confirm CAN wiring is connected to CAN HAT
-- Check VESCs are receiving 24V from PDB
-- Verify RC controller/receiver are paired and connected
-- Confirm control software is running
+- No CAN control code has been pushed to the Pi — this is the primary blocker
+- Verify Pi is powered and accessible via SSH/NoMachine
+- Confirm CAN wiring from VESCs reaches the CAN HAT terminal on the Pi
+- Check all VESCs are receiving 24V from PDB
+- Verify RC controller and receiver are paired
+
+</details>
+
+<details>
+<summary><strong>LiDAR pops the fuse</strong></summary>
+
+- The LiDAR pops the 5A 24V fuse on the PDB when plugged in — root cause unknown at handoff
+- Check for a short in the 12V DC-DC converter wiring or LiDAR power cable
+- Try a higher-rated fuse temporarily to determine if it's a current spike vs. a dead short
+- Inspect the LiDAR power connector for damage
 
 </details>
 
 <details>
 <summary><strong>No power / inconsistent power</strong></summary>
 
-- Antispark switch is broken — system always powers on
-- Inspect PDB fuse status (especially LiDAR line)
-- Verify XT90/XT60 connectors are secure
-- Confirm 5V output is wired to Raspberry Pi and USB hub
+- Antispark switch is broken — system powers on as soon as the battery is connected
+- Do not rely on the switch for any safety function
+- Physically disconnect the XT90 to cut power
+- Check PDB fuse status for each rail
 
 </details>
 
 <details>
 <summary><strong>Cannot connect to Raspberry Pi</strong></summary>
 
-- Verify Pi is receiving 5V (wiring is currently incomplete)
-- Confirm network/WiFi settings
-- Check SSH or NoMachine configuration
-- Note: Pi was reflashed — environment may need reconfiguration
-
-</details>
-
-<details>
-<summary><strong>Sensors not working</strong></summary>
-
-- Cameras: verify USB connections to powered hub
-- LiDAR: check PDB fuse and 12V power line
-- GPS: not installed yet
-- Confirm USB hub itself is powered
+- Verify Pi is receiving 5V
+- Confirm WiFi/network configuration
+- Check SSH or NoMachine settings
+- Pi was reflashed — some environment setup may need to be redone
 
 </details>
 
 <details>
 <summary><strong>Steering not working</strong></summary>
 
-- AS5600 encoder is not connected to VESC 5
-- Encoder uses I2C (designed for microcontrollers, not direct VESC input)
-- May require adapter circuit or replacement encoder
-- Steering VESC config cannot be completed without encoder feedback
+- The AS5600 encoder is **not compatible with direct VESC input** — do not try to wire it to VESC 5
+- Wire the AS5600 directly to the Raspberry Pi via I2C
+- Read steering angle in software and send position commands to VESC 5 from the Pi
+- VESC 5 is configured and connected to the steering motor — just needs software-side control loop
 
 </details>
 
 <details>
 <summary><strong>CAN communication issues</strong></summary>
 
-- Verify daisy-chain wiring between all VESCs
-- Connect CAN lines to CAN HAT terminal block on Raspberry Pi
+- CAN wiring between all 5 VESCs is complete and working
+- The CAN lines still need to be connected to the CAN HAT terminal block on the Pi
 - Yellow = CAN High, Green = CAN Low
-- CAN between VESCs works; Pi↔VESC CAN not yet implemented
+- ⚠️ JST connectors at each VESC are fragile — inspect for wire breaks if CAN is intermittent
 
 </details>
 
 <details>
-<summary><strong>Safety / emergency</strong></summary>
+<summary><strong>Safety / emergency stop</strong></summary>
 
-⚠️ Emergency stop system is **not connected**.  
-If unexpected movement, overheating, sparks, or noise occur:  
-**Physically disconnect the XT90 battery connector immediately.**  
-Do not rely on the antispark switch.
+⚠️ The emergency stop system is **not connected**.  
+If anything goes wrong: **physically disconnect the XT90 battery connector**.  
+Do not rely on the antispark switch — it passes power even when switched off.
 
 </details>
 
@@ -245,26 +268,34 @@ Do not rely on the antispark switch.
 
 ## 📷 Media
 
-> Images are stored in `docs/media/`. Add the image files to that folder and they will render here.
+> Images are stored in `docs/media/`. Export photos from the original Google Doc or presentation and place them in that folder using the filenames below.
 
 | Preview | Description |
 |---|---|
-| ![OAK-D Depth Map](docs/media/oakd_depth_map.jpg) | OAK-D camera generating a real-time depth map |
-| ![OAK-D RGB Output](docs/media/oakd_rgb.jpg) | OAK-D camera standard RGB image output |
-| ![Hardware Components](docs/media/hardware_components.jpg) | Packaged Raspberry Pi units and protective enclosures |
-| ![VESC Connectors](docs/media/vesc_connectors.jpg) | VESC controller with labeled CAN, SENSE, COMM, SWD, USB interfaces |
-| ![Power Wiring](docs/media/power_wiring.jpg) | Red high-current power cable spool |
-| ![PDB & DC-DC Converters](docs/media/pdb_dcdc.jpg) | PDB and DC-DC converters installed inside chassis |
-| ![Fuse Block & XT Connectors](docs/media/fuse_block.jpg) | Internal fuse block, XT connectors, and battery power wiring |
-| ![Steering Encoder](docs/media/steering_encoder.jpg) | Steering encoder mounted inside chassis |
-| ![AS5600 Encoder](docs/media/as5600_encoder.jpg) | AS5600 magnetic encoder in custom 3D-printed holder |
-| ![Motors & Hall Encoders](docs/media/motors_encoders.jpg) | Underside view — motors, Hall encoders, and VESC wiring |
-| ![Internal Wiring](docs/media/internal_wiring.jpg) | VESC controllers, power connections, and encoder wiring inside chassis |
-| ![Rear Structure](docs/media/rear_structure.jpg) | Rear of Jeep with mounted camera and electronics bay |
-| ![Front Assembly](docs/media/front_assembly.jpg) | Fully assembled front — LiDAR and front OAK-D camera |
+| ![AS5600 Encoder](docs/media/as5600_encoder.jpg) | AS5600 magnetic encoder in custom yellow 3D-printed holder |
+| ![Internal Wiring](docs/media/internal_wiring.jpg) | Top-down view of chassis — VESCs, PDB, encoder mounts |
+| ![PDB Fuse Block](docs/media/pdb_fuse_block.jpg) | PDB with active fuse block and XT connectors |
+| ![Underside Motors](docs/media/underside_motors.jpg) | Underside — motors, Hall encoders, and VESC wiring |
+| ![Front Assembly](docs/media/front_assembly.jpg) | Front of jeep — LiDAR on hood, OAK-D camera below |
+| ![Full Jeep Side](docs/media/jeep_side_view.jpg) | Full vehicle side view with all hardware mounted |
 
 **Videos:**
-- 🎥 [Both Cameras Demo](https://drive.google.com/file/d/1gASmeuNE30h5Eg7waWI6OVzTFIr_cnO4/view?usp=sharing) — Dual OAK-D camera setup with front and rear perception
+- 🎥 [Both Cameras Demo](https://drive.google.com/file/d/1gASmeuNE30h5Eg7waWI6OVzTFIr_cnO4/view?usp=sharing) — Dual OAK-D setup demonstrating depth map and RGB output
+
+---
+
+## 🔮 Advice for Future Teams
+
+**Hardware:**
+- Wire the AS5600 absolute encoder directly to the Raspberry Pi via I2C — not to the steering VESC
+- Get longer USB cables for the front camera, LiDAR, and Pi/USB hub connections
+- Install a GPS module (the original team never received one)
+- A game controller is a simpler starting point before setting up the Radiomaster RC system
+
+**Software:**
+- First priority: interface all 5 VESCs via CAN from the Pi
+- Then configure OAK-D cameras and LiDAR as Pi peripherals
+- DonkeyCar is a reasonable starting framework for autonomous behavior
 
 ---
 
@@ -272,12 +303,31 @@ Do not rely on the antispark switch.
 
 | Resource | Link |
 |---|---|
+| Final Presentation | [PDF](docs/ECE_MAE_148_Project_Final_Presentation.pdf) |
 | System Schematic | [View Schematic](https://ucsdcloud-my.sharepoint.com/:u:/g/personal/kebraun_ucsd_edu/IQCRasxiZergSodErnQQG6UNAVxrW2Y3mB9if8TZqUndJ9E?e=tebVNc) |
 | Mounts Documentation | [Google Drive PDF](https://drive.google.com/file/d/1jBLu-lDB1_-cbu3ugVZViqdFXvc3JRHq/view?usp=sharing) |
 | Dual Camera Demo | [Google Drive Video](https://drive.google.com/file/d/1gASmeuNE30h5Eg7waWI6OVzTFIr_cnO4/view?usp=sharing) |
 
 ---
 
+## 👥 Team
+
+All hardware design, fabrication, wiring, and mechanical integration was completed by the original ECE/MAE 148 team. This repo documents their work, with ongoing contributions toward Raspberry Pi software setup.
+
+| Name | Major | Contributions |
+|---|---|---|
+| **Yves Mojica** | Electrical & Computer Engineering | VESC wiring & setup, Raspberry Pi mount design |
+| **Brent Brewster** | Electrical & Computer Engineering | Encoder mounting, Raspberry Pi setup |
+| **Dylan Lee** | Mechanical & Aerospace Engineering | Power wiring, CAN wiring |
+| **Keenai Braun** | Mechanical & Aerospace Engineering | Camera mounts, LiDAR mount design |
+
+*A strong hardware foundation was laid for future teams to build on — despite challenges including a lab fire, order delays, and hardware compatibility issues discovered late in the quarter.*
+
+---
+
 ## 🎓 About
 
-This project is part of **Triton AI** at UC San Diego. It is designed to be educational and accessible, giving students hands-on experience with robotics, electronics, and AI systems.
+**Course:** ECE/MAE 148 — Autonomous Vehicles  
+**Institution:** UC San Diego — Jacobs School of Engineering  
+**Organization:** [Triton AI](https://triton-ai.org)  
+**Presented:** March 19, 2026
