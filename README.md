@@ -1,4 +1,4 @@
-# 🚗 JeepBot — ECE/MAE 148 | Team 02
+# 🚗 JeepBot
 
 > A PowerWheels Jeep retrofitted with VESCs, a Raspberry Pi 5, dual OAK-D cameras, LiDAR, and GPS — built as a platform for autonomous robotics development.  
 > **UC San Diego — Jacobs School of Engineering | March 2026**
