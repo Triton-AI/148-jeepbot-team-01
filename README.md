@@ -49,9 +49,12 @@ Full technical documentation is available in `/docs`:
 - Hardware → docs/hardware.md  
 - Software → docs/software.md  
 - Current Status → docs/current_status.md  
-- Setup Guide → setup/setup_guide.md  
+- Mechanical Mounts → docs/mechanical_mounts.md  
+- Bill of Materials → docs/bill_of_materials.md  
+- Progress & Logs → docs/progress_logs.md  
 - Troubleshooting → docs/troubleshooting.md  
 - System Schematic → docs/system_schematic.md  
+- Setup Guide → setup/setup_guide.md   
 
 ---
 
