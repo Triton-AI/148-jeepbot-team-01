@@ -55,6 +55,8 @@ It documents development over time and helps maintain alignment across the team.
   - A new **Version 2** will be created for updated work and ongoing progress  
 - Team was asked to document progress with as many photos as possible this week for presentation purposes  
 
+---
+
 ### April 30 — Updates
 
 Completed Work
