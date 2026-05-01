@@ -55,19 +55,49 @@ It documents development over time and helps maintain alignment across the team.
   - A new **Version 2** will be created for updated work and ongoing progress  
 - Team was asked to document progress with as many photos as possible this week for presentation purposes  
 
+### April 30 — Updates
+
+Completed Work
+- Final laser cuts for electronics mounting plates completed
+- First iteration of mechanical mounts 3D printed
+- Feedback provided to MAP mechanical team for improvements
+- GitHub repository reorganized:
+  - Version 1 (past work)
+  - Version 2 (current + ongoing work)
+- Initial system documentation created (overview, hardware, software, etc.)
+- Schematics updated based on recent discussions
 ---
 
 ## 3. Current Status
-*(Continuously updated)*
 
-- To be updated with latest system status  
+- Mechanical mounts:
+  - First iteration completed and evaluated
+  - Waiting on updated designs from MAP team
+- Wiring:
+  - Significant work still required
+  - Initial connections made (XT60, MR60F)
+- Documentation:
+  - Version 2 structure created and being actively updated
+- System architecture:
+  - Finalized around 2 VESC setup (drive + steering) 
 
 ---
 
 ## 4. Next Steps
-*(Continuously updated)*
 
-- To be defined based on latest progress  
+- Receive and evaluate next iteration of mechanical mounts (expected Sunday)
+- Continue wiring implementation:
+  - Verify motor polarity
+  - Improve cable management
+- Purchase additional wiring materials:
+  - 12 AWG black wire
+  - Potentially 12 AWG red wire depending on system needs
+- Confirm wiring quality with professor:
+  - Verify if XT60 connection is acceptable using 12AG wire instead of 12 AWG
+- Upload progress photos to GitHub (version2/media)
+- Continue updating documentation in version2
+- Integrate updated schematics into implementation
+- Prepare progress updates for presentation
 
 ---
 
@@ -83,42 +113,5 @@ It documents development over time and helps maintain alignment across the team.
 
 - Major issues and milestones should be recorded  
 
-April 30 — Updates
 
-Completed Work
-- Final laser cuts for electronics mounting plates completed
-- First iteration of mechanical mounts 3D printed
-- Feedback provided to MAP mechanical team for improvements
-- GitHub repository reorganized:
-  - Version 1 (past work)
-  - Version 2 (current + ongoing work)
-- Initial system documentation created (overview, hardware, software, etc.)
-- Schematics updated based on recent discussions
-
-Current Status
-- Mechanical mounts:
-  - First iteration completed and evaluated
-  - Waiting on updated designs from MAP team
-- Wiring:
-  - Significant work still required
-  - Initial connections made (XT60, MR60F)
-- Documentation:
-  - Version 2 structure created and being actively updated
-- System architecture:
-  - Finalized around 2 VESC setup (drive + steering)
-
-Next Steps
-- Receive and evaluate next iteration of mechanical mounts (expected Sunday)
-- Continue wiring implementation:
-  - Verify motor polarity
-  - Improve cable management
-- Purchase additional wiring materials:
-  - 12 AWG black wire
-  - Potentially 12 AWG red wire depending on system needs
-- Confirm wiring quality with professor:
-  - Verify if XT60 connection is acceptable using 12AG wire instead of 12 AWG
-- Upload progress photos to GitHub (version2/media)
-- Continue updating documentation in version2
-- Integrate updated schematics into implementation
-- Prepare progress updates for presentation
 
