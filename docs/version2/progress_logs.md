@@ -96,7 +96,7 @@ Completed Work
   - 12 AWG black wire
   - Potentially 12 AWG red wire depending on system needs
 - Confirm wiring quality with professor:
-  - Verify if XT60 connection is acceptable using 12 AWG wire (previously noted as 12AG)
+  - Verify if XT60 connection is acceptable using 12 GA wire (previously noted as 12AWG)
 - Clarify remaining system requirements:
   - Ask what additional components or wiring steps are still needed
 - Upload progress photos to GitHub (version2/media)
