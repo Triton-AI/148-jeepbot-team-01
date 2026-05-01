@@ -87,15 +87,18 @@ Completed Work
 
 ## 4. Next Steps
 
-- Receive and evaluate next iteration of mechanical mounts (expected Sunday)
+- Receive and evaluate next iteration of mechanical mounts once available
 - Continue wiring implementation:
-  - Verify motor polarity
-  - Improve cable management
+- Prepare and test wiring components:
+  - Create 2 wires (30 cm each) with MR60 male connectors
+  - Understand their purpose and confirm design with Jack
 - Purchase additional wiring materials:
   - 12 AWG black wire
   - Potentially 12 AWG red wire depending on system needs
 - Confirm wiring quality with professor:
-  - Verify if XT60 connection is acceptable using 12AG wire instead of 12 AWG
+  - Verify if XT60 connection is acceptable using 12 AWG wire (previously noted as 12AG)
+- Clarify remaining system requirements:
+  - Ask what additional components or wiring steps are still needed
 - Upload progress photos to GitHub (version2/media)
 - Continue updating documentation in version2
 - Integrate updated schematics into implementation
