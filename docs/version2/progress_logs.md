@@ -68,6 +68,16 @@ Completed Work
   - Version 2 (current + ongoing work)
 - Initial system documentation created (overview, hardware, software, etc.)
 - Schematics updated based on recent discussions
+
+---
+
+### May 1 — Updates (Meeting)
+
+Jack gave an update on how the high school students in the program will be able to support us in multiple ways.
+
+* Emphasized the importance of consistently taking photos and documenting our work
+* This will be useful for future classes and for the next group of students
+
 ---
 
 ## 3. Current Status
