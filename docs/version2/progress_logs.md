@@ -100,8 +100,7 @@ Jack gave an update on how the high school students in the program will be able 
 - Receive and evaluate next iteration of mechanical mounts once available
 - Continue wiring implementation:
 - Prepare and test wiring components:
-  - Create 2 wires (30 cm each) with MR60 male connectors
-  - Understand their purpose and confirm design with Jack
+  - Create 2 wires (30 cm each) with MR60 male connectors (motors to VESC)
 - Purchase additional wiring materials:
   - 12 AWG black wire
   - Potentially 12 AWG red wire depending on system needs
