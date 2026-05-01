@@ -1,11 +1,7 @@
 # System Schematic
 
 ## Overview
-This diagram represents the full system architecture, including:
-- Power distribution (battery → antispark → PDB → DC-DC)
-- Control system (Raspberry Pi, Arduino, radio receiver)
-- Actuation (VESCs, motors, steering)
-- Sensors (OAK-D cameras, LiDAR, GPS)
+This diagram represents the full system architecture, including power, control, actuation, and sensors.
 
 ---
 
