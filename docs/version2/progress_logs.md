@@ -1,4 +1,3 @@
-
 ## 1. Overview
 This section tracks the progress of the project, including completed work, current status, and next steps.
 
@@ -59,7 +58,7 @@ It documents development over time and helps maintain alignment across the team.
 
 ### April 30 — Updates
 
-Completed Work
+**Completed Work**
 - Final laser cuts for electronics mounting plates completed
 - First iteration of mechanical mounts 3D printed
 - Feedback provided to MAP mechanical team for improvements
@@ -73,42 +72,84 @@ Completed Work
 
 ### May 1 — Updates (Meeting)
 
-Jack gave an update on how the high school students in the program will be able to support us in multiple ways.
+- Emphasized the importance of consistently taking photos and documenting our work
+- This will be useful for future classes and for the next group of students
 
-* Emphasized the importance of consistently taking photos and documenting our work
-* This will be useful for future classes and for the next group of students
+---
+
+### May 6 — Updates (Lab Work)
+
+**System Architecture / PDB Changes**
+- System updated from 2 PDBs → 4 PDB configuration
+- Front PDB:
+  - powers steering VESC
+  - sends power to rear PDB
+- Rear PDB distributes power to:
+  - motor VESC
+  - 24V → 5V DC-DC converter
+  - 24V → 12V DC-DC converter
+
+**Completed Work**
+- Rear XT60 → XT60 PDB completed
+- Front XT90 → XT60 PDB partially completed
+- Front-to-back 10 AWG XT60M → XT60F power cable assembled
+- Significant wire labeling completed
+
+**Documentation**
+- System schematic updated to reflect latest architecture
+- Editable SharePoint schematic link updated
+- GitHub documentation under version2 continues to be updated
+
+**Outstanding Tasks**
+- Acquire XT90 connector for front PDB input
+- Build XT60 → XT30 PDBs for DC-DC converters
+- Finalize EMO integration with the rest of the system
+- Locate relay/current-handling component required for EMO implementation
+- Continue documentation and progress photos
+
+**Notes**
+- Additional schematic review recommended before final wiring implementation
 
 ---
 
 ## 3. Current Status
 
-- Mechanical mounts:
-  - First iteration completed and evaluated
-  - Waiting on updated designs from MAP team
-- Wiring:
-  - Significant work still required
-  - Initial connections made (XT60, MR60F)
-- Documentation:
-  - Version 2 structure created and being actively updated
-- System architecture:
-  - Finalized around 2 VESC setup (drive + steering) 
+**Mechanical Mounts**
+- First iteration completed and evaluated
+- Waiting on updated designs from MAP team
+
+**Wiring**
+- Significant work still required
+- Initial connections made (XT60, MR60F)
+- Front and rear PDB architecture updated
+
+**Documentation**
+- Version 2 structure created and being actively updated
+- Schematics and wiring documentation updated
+
+**System Architecture**
+- Finalized around 2 VESC setup (drive + steering)
+- Updated to 4 PDB power distribution layout
 
 ---
 
 ## 4. Next Steps
 
 - Receive and evaluate next iteration of mechanical mounts once available
-- Continue wiring implementation:
-- Prepare and test wiring components:
-  - Create 2 wires (30 cm each) with MR60 male connectors (motors to VESC)
-- Purchase additional wiring materials:
-  - 12 AWG black wire
-  - Potentially 12 AWG red wire depending on system needs
-- Confirm wiring quality with professor:
-  - Verify if XT60 connection is acceptable using 12 GA wire (previously noted as 12AWG)
-- Clarify remaining system requirements:
-  - Ask what additional components or wiring steps are still needed
-- Upload progress photos to GitHub (version2/media)
+
+**Continue Wiring Implementation**
+- Prepare and test wiring components
+- Finalize front XT90 → XT60 PDB
+- Build XT60 → XT30 PDBs for DC-DC converters
+- Verify EMO integration and relay implementation
+
+**Acquire Remaining Components**
+- XT90 connector
+- Relay/current-handling component for EMO
+- Remaining PDB/DC-DC related parts
+
+**Documentation**
+- Upload additional progress photos to GitHub (version2/media)
 - Continue updating documentation in version2
 - Integrate updated schematics into implementation
 - Prepare progress updates for presentation
@@ -118,14 +159,16 @@ Jack gave an update on how the high school students in the program will be able 
 ## 5. Key Challenges
 *(Continuously updated)*
 
-- To be updated as issues are identified  
+- Wiring implementation and power distribution complexity
+- Missing XT90 and relay/current-handling components
+- EMO integration still undefined
 
 ---
 
 ## 6. Notes
 *(Continuously updated)*
 
-- Major issues and milestones should be recorded  
-
+- Major issues and milestones should be recorded
+- Continue documenting implementation progress with photos
 
 
