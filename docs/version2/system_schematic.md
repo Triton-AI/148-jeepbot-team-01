@@ -6,7 +6,7 @@ This diagram represents the full system architecture, including power, control, 
 ---
 
 ## Interactive Version
-🔗 [Open Editable Schematic (SharePoint)]([https://ucsdcloud-my.sharepoint.com/:u:/g/personal/hrubim_ucsd_edu/IQCxfeaB-xmnSrFH_fL8HkIkAejA7a_xhp8tK149ex-IXM8?e=XUZfAT]
+🔗[Open Editable Schematic (SharePoint)](https://ucsdcloud-my.sharepoint.com/:u:/r/personal/hrubim_ucsd_edu/Documents/Drawing.vsdx?d=w81e67db119fb4aa7b147fdf2fc1e4224&csf=1&web=1&e=U7m3HO)
 
 ---
 
