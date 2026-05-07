@@ -6,7 +6,7 @@ This diagram represents the initial system architecture before simplification.
 ---
 
 ## Interactive Version
-🔗 [Open Editable Schematic (SharePoint)](https://ucsdcloud-my.sharepoint.com/:u:/r/personal/kebraun_ucsd_edu/_layouts/15/Doc.aspx?sourcedoc=%7B62cc6a91-ea65-4ae0-8744-ae74101ba50d%7D&action=edit&wdIsModeSwitch=1&or=PrevEdit)
+🔗 [Open Editable Schematic (SharePoint)](https://ucsdcloud-my.sharepoint.com/:u:/g/personal/hrubim_ucsd_edu/IQCxfeaB-xmnSrFH_fL8HkIkAejA7a_xhp8tK149ex-IXM8?e=UP267h)
 
 ---
 
