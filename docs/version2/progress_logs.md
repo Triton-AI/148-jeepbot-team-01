@@ -112,6 +112,19 @@ It documents development over time and helps maintain alignment across the team.
 
 ---
 
+### May 8 — Updates (Meeting)
+
+- Prof. Jack suggested checking with Corey for extra XT90 connectors before ordering new ones on Amazon
+- Corey may already have pre-soldered XT90 connectors available
+- Relay components should already be located in the team workbench according to Prof. Silberman
+- Need to confirm the micro PDB splitter setup with Jose
+- Current goal is to get the JeepBot physically running by Monday
+- Goal for the next meeting is to achieve basic remote control functionality
+- Additional support from another ECE/MAE 148 team will assist with the JeepBot project
+- Possible meeting with the assisting 148 team planned for next week depending on availability
+
+---
+
 ## 3. Current Status
 
 **Mechanical Mounts**
