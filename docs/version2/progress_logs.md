@@ -125,6 +125,17 @@ It documents development over time and helps maintain alignment across the team.
 
 ---
 
+### May 14 — Updates (Lab Work)
+
+- Multiple PDBs soldered and assembled
+- Located the small XT60 → XT30 PDBs (green boards)
+- Continued progress on wiring organization and power distribution setup
+- Waiting for remaining fuses to arrive
+- Waiting for 24V → 12V DC-DC converter
+- T12 team has been helping significantly with the project
+
+---
+
 ## 3. Current Status
 
 **Mechanical Mounts**
