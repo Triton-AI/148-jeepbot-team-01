@@ -13,3 +13,11 @@ This diagram represents the full system architecture, including power, control, 
 ## Static View
 
 ![System Schematic](media/schematics/system_schematic_v2.png)
+
+
+---
+
+## Static With Components
+
+![System Schematic With Components](media/schematics/schematic_components.png)
+
