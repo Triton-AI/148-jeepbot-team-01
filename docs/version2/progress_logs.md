@@ -136,19 +136,57 @@ It documents development over time and helps maintain alignment across the team.
 
 ---
 
+### May 22 — Sprint 2 Progress Report
+
+**Completed Work**
+- Learned how to use the encoder in VESC Tool and integrated it with PyVESC to control all motors through Python
+- Soldered all PDBs and wires
+- Set up OAK-D Pro to run with Python
+- Completed a test drive
+- Created a web documentation site covering the full JeepBot setup guide (VESC, Encoder, F710 Controller & Raspberry Pi)
+
+**Lessons Learned**
+- Configured encoder + motor to work as a servo
+- Camera setup process
+- Controlling 2 VESCs for driving and steering via PyVESC
+- Used DonkeyCar as a reference for JeepBot implementation
+
+**Challenges**
+- OAK-D Pro camera gray screen issue encountered during setup
+- Anti-spark troubleshooting required before finding a working configuration
+- JeepBot currently controls correctly via controller but loses control when camera preview is open
+
+**Components Needed**
+- *Urgent:*
+  - Long USB to Micro USB cable ×1 (to connect front VESC to Raspberry Pi)
+  - Long USB to USB-C cable ×2 (to connect front camera data and power to Pi and hub)
+- *For future:*
+  - 10A Mini Blade Fuse
+  - Fuse holder
+
+---
+
 ## 3. Current Status
 
 **Mechanical Mounts**
 - First iteration completed and evaluated
 - Waiting on updated designs from MAP team
+- Electrical components not yet permanently mounted
 
 **Wiring**
-- Significant work still required
-- Initial connections made (XT60, MR60F)
-- Front and rear PDB architecture updated
+- All PDBs soldered and assembled
+- Wiring cleanup in progress — goal is safe passenger boarding
+- Anti-spark working after troubleshooting
+
+**Software / Controls**
+- VESC encoder integrated with PyVESC
+- Motor control through Python operational
+- OAK-D Pro camera set up with Python; gray screen issue under investigation
+- Controller-based driving functional; camera preview causes loss of control (active issue)
 
 **Documentation**
 - Version 2 structure created and being actively updated
+- Web documentation site live with full setup guide
 - Schematics and wiring documentation updated
 
 **System Architecture**
@@ -159,33 +197,41 @@ It documents development over time and helps maintain alignment across the team.
 
 ## 4. Next Steps
 
-- Receive and evaluate next iteration of mechanical mounts once available
+**Wiring & Hardware**
+- Clean up all wiring for safe passenger boarding
+- Mount all electrical components permanently
+- Acquire urgent cables (USB to Micro USB ×1, USB to USB-C ×2)
+- Acquire 10A Mini Blade Fuses and fuse holder
 
-**Continue Wiring Implementation**
-- Prepare and test wiring components
-- Finalize front XT90 → XT60 PDB
-- Build XT60 → XT30 PDBs for DC-DC converters
-- Verify EMO integration and relay implementation
+**Software & Perception**
+- Set up object detection
+- Implement obstacle detection and automatic stopping
+- Resolve OAK-D Pro camera preview conflict with motor control
 
-**Acquire Remaining Components**
-- XT90 connector
-- Relay/current-handling component for EMO
-- Remaining PDB/DC-DC related parts
+**Navigation (Planned)**
+- GPS integration and waypoint planning (Week 1–2)
+- Heading and motion controller (Week 2)
+- OAK-D depth stream setup (Week 1)
+- Obstacle detection and avoidance (Week 2)
+
+**Integration & Testing (Planned)**
+- System fusion and route definition (Week 3, May 23 – Jun 1)
+- Outdoor test runs and tuning (Week 4, Jun 1–5)
+- Final demo (Jun 5–7)
 
 **Documentation**
+- Continue updating GitHub (version2)
 - Upload additional progress photos to GitHub (version2/media)
-- Continue updating documentation in version2
-- Integrate updated schematics into implementation
-- Prepare progress updates for presentation
 
 ---
 
 ## 5. Key Challenges
 *(Continuously updated)*
 
-- Wiring implementation and power distribution complexity
-- Missing XT90 and relay/current-handling components
-- EMO integration still undefined
+- OAK-D Pro camera gray screen issue
+- JeepBot loses motor control when camera preview is active
+- Wiring still needs cleanup and permanent mounting
+- Missing urgent cables (USB to Micro USB, USB to USB-C)
 
 ---
 
@@ -194,5 +240,6 @@ It documents development over time and helps maintain alignment across the team.
 
 - Major issues and milestones should be recorded
 - Continue documenting implementation progress with photos
-
+- Web documentation site available — link accessible via QR code in Sprint 2 slides
+- DonkeyCar used as implementation reference for PyVESC integration
 
