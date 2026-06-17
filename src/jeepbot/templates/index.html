@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JeepBot Controller</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+
+    h1 { font-size: 22px; margin-bottom: 12px; color: #fff; }
+
+    /* Mode display */
+    .mode-label {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .mode-value {
+      font-size: 26px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      min-height: 36px;
+    }
+    .mode-value.manual        { color: #aaa; }
+    .mode-value.record        { color: #f55; }
+    .mode-value.auto_steering { color: #4af; }
+    .mode-value.full_drive    { color: #4f4; }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    button {
+      padding: 12px 22px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-weight: bold;
+      transition: opacity 0.15s;
+    }
+    button:hover { opacity: 0.85; }
+
+    .btn-manual        { background: #444; color: #eee; }
+    .btn-record        { background: #c00; color: #fff; }
+    .btn-auto_steering { background: #06f; color: #fff; }
+    .btn-full_drive    { background: #080; color: #fff; }
+
+    button.active { border-color: #fff; }
+
+    /* Record indicator */
+    #rec-status {
+      font-size: 13px;
+      color: #f55;
+      min-height: 18px;
+      margin-bottom: 10px;
+    }
+
+    /* Camera feeds */
+    .camera-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      width: 100%;
+      max-width: 1500px;
+      margin: 10px auto 0;
+    }
+    .camera-card {
+      background: #181818;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 10px;
+    }
+    .camera-title {
+      color: #aaa;
+      font-size: 13px;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .camera-card img {
+      display: block;
+      width: 100%;
+      min-height: 220px;
+      background: #050505;
+      border-radius: 8px;
+      border: 1px solid #333;
+    }
+    .camera-view {
+      position: relative;
+      background: #050505;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .camera-view img {
+      border: 1px solid #333;
+    }
+    #yolo-overlay {
+      height: 100%;
+      left: 0;
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      width: 100%;
+    }
+    .yolo-status {
+      align-items: center;
+      color: #aaa;
+      display: flex;
+      flex-wrap: wrap;
+      font-size: 13px;
+      gap: 10px;
+      justify-content: space-between;
+      margin-top: 8px;
+      min-height: 20px;
+      text-align: left;
+    }
+    .yolo-status.running { color: #6ee7a8; }
+    .yolo-status.error { color: #ff6b6b; }
+    .yolo-list {
+      color: #ccc;
+      font-size: 12px;
+      line-height: 1.4;
+      margin-top: 6px;
+      min-height: 18px;
+      text-align: left;
+    }
+    .camera-empty {
+      align-items: center;
+      background: #050505;
+      border: 1px dashed #444;
+      border-radius: 8px;
+      color: #777;
+      display: flex;
+      min-height: 220px;
+      justify-content: center;
+    }
+    @media (max-width: 900px) {
+      .camera-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🚙 JeepBot Controller</h1>
+
+  <div class="mode-label">Current Mode</div>
+  <div class="mode-value" id="mode-display">{{ mode }}</div>
+
+  <div class="btn-row">
+    <button class="btn-manual"        onclick="setMode('manual')">⚙ Manual</button>
+    <button class="btn-record"        onclick="setMode('record')">⏺ Record</button>
+    <button class="btn-auto_steering" onclick="setMode('auto_steering')">↔ Auto Steer</button>
+    <button class="btn-full_drive"    onclick="setMode('full_drive')">🤖 Full Drive</button>
+  </div>
+
+  <div id="rec-status"></div>
+
+  <div class="camera-grid">
+    <section class="camera-card">
+      <div class="camera-title">Front Camera</div>
+      <div class="camera-view">
+        <img id="front-video" src="/video/front" alt="Front camera stream" />
+        <canvas id="yolo-overlay"></canvas>
+      </div>
+      <div class="yolo-status" id="yolo-status">
+        <span>YOLO: waiting</span>
+        <span id="yolo-metrics"></span>
+      </div>
+      <div class="yolo-list" id="yolo-list"></div>
+    </section>
+
+    <section class="camera-card">
+      <div class="camera-title">Rear Camera</div>
+      {% if rear_enabled %}
+      <img src="/video/rear" alt="Rear camera stream" />
+      {% else %}
+      <div class="camera-empty">Rear camera not detected</div>
+      {% endif %}
+    </section>
+  </div>
+
+  <script>
+    let currentMode = "{{ mode }}";
+    let lastDetections = null;
+
+    function updateDisplay(mode) {
+      currentMode = mode;
+      const el = document.getElementById("mode-display");
+      el.textContent = mode;
+      el.className = "mode-value " + mode;
+
+      // Highlight active button
+      document.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+      const btn = document.querySelector(".btn-" + mode);
+      if (btn) btn.classList.add("active");
+    }
+
+    function setMode(mode) {
+      fetch("/set_mode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode })
+      })
+      .then(r => r.json())
+      .then(data => updateDisplay(data.mode))
+      .catch(err => console.error("setMode error:", err));
+    }
+
+    // Poll for mode changes (in case another client changes it)
+    setInterval(() => {
+      fetch("/get_mode")
+        .then(r => r.json())
+        .then(data => {
+          if (data.mode !== currentMode) updateDisplay(data.mode);
+        })
+        .catch(() => {});
+    }, 1000);
+
+    // Show REC indicator
+    setInterval(() => {
+      const el = document.getElementById("rec-status");
+      if (currentMode === "record") {
+        el.textContent = "● RECORDING — hold deadman button on controller";
+      } else {
+        el.textContent = "";
+      }
+    }, 500);
+
+    // Init highlight
+    updateDisplay(currentMode);
+
+    const yoloCanvas = document.getElementById("yolo-overlay");
+    const yoloCtx = yoloCanvas.getContext("2d");
+    const frontVideo = document.getElementById("front-video");
+    const yoloStatus = document.getElementById("yolo-status");
+    const yoloMetrics = document.getElementById("yolo-metrics");
+    const yoloList = document.getElementById("yolo-list");
+
+    function resizeOverlay() {
+      const rect = frontVideo.getBoundingClientRect();
+      const width = Math.max(1, Math.round(rect.width));
+      const height = Math.max(1, Math.round(rect.height));
+      if (yoloCanvas.width !== width || yoloCanvas.height !== height) {
+        yoloCanvas.width = width;
+        yoloCanvas.height = height;
+      }
+      drawDetections();
+    }
+
+    function drawDetections() {
+      resizeCanvasOnly();
+      yoloCtx.clearRect(0, 0, yoloCanvas.width, yoloCanvas.height);
+      if (!lastDetections || !lastDetections.frame_width || !lastDetections.frame_height) return;
+
+      const scaleX = yoloCanvas.width / lastDetections.frame_width;
+      const scaleY = yoloCanvas.height / lastDetections.frame_height;
+      yoloCtx.lineWidth = 2;
+      yoloCtx.font = "12px Arial";
+
+      lastDetections.detections.forEach((det) => {
+        const box = det.box;
+        const x = box.x1 * scaleX;
+        const y = box.y1 * scaleY;
+        const w = (box.x2 - box.x1) * scaleX;
+        const h = (box.y2 - box.y1) * scaleY;
+        const distance = formatDistance(det);
+        const label = `${det.label} ${(det.confidence * 100).toFixed(0)}%${distance ? " " + distance : ""}`;
+
+        yoloCtx.strokeStyle = "#35f28a";
+        yoloCtx.fillStyle = "rgba(53, 242, 138, 0.18)";
+        yoloCtx.strokeRect(x, y, w, h);
+        yoloCtx.fillRect(x, y, w, h);
+
+        const labelWidth = yoloCtx.measureText(label).width + 8;
+        const labelY = Math.max(0, y - 18);
+        yoloCtx.fillStyle = "#35f28a";
+        yoloCtx.fillRect(x, labelY, labelWidth, 18);
+        yoloCtx.fillStyle = "#06130c";
+        yoloCtx.fillText(label, x + 4, labelY + 13);
+      });
+    }
+
+    function resizeCanvasOnly() {
+      const rect = frontVideo.getBoundingClientRect();
+      const width = Math.max(1, Math.round(rect.width));
+      const height = Math.max(1, Math.round(rect.height));
+      if (yoloCanvas.width !== width || yoloCanvas.height !== height) {
+        yoloCanvas.width = width;
+        yoloCanvas.height = height;
+      }
+    }
+
+    function formatDistance(det) {
+      if (det.distance_m === null || det.distance_m === undefined) return "";
+      return `${Number(det.distance_m).toFixed(2)}m`;
+    }
+
+    function updateYoloStatus(data) {
+      lastDetections = data;
+      yoloStatus.className = "yolo-status " + (data.status || "disabled");
+
+      const count = data.detections ? data.detections.length : 0;
+      const depthText = data.depth_status ? ` depth:${data.depth_status}` : "";
+      const statusText = data.error ? `YOLO: ${data.error}` : `YOLO: ${data.status || "disabled"}${depthText} (${count})`;
+      yoloStatus.firstElementChild.textContent = statusText;
+
+      if (data.inference_ms !== null && data.inference_ms !== undefined) {
+        yoloMetrics.textContent = `${data.inference_ms} ms`;
+      } else {
+        yoloMetrics.textContent = "";
+      }
+
+      if (count > 0) {
+        yoloList.textContent = data.detections
+          .slice(0, 6)
+          .map((det) => {
+            const distance = formatDistance(det);
+            return `${det.label} ${(det.confidence * 100).toFixed(0)}%${distance ? " " + distance : ""}`;
+          })
+          .join("   ");
+      } else {
+        yoloList.textContent = "";
+      }
+
+      drawDetections();
+    }
+
+    setInterval(() => {
+      fetch("/detections")
+        .then(r => r.json())
+        .then(updateYoloStatus)
+        .catch(() => {
+          yoloStatus.className = "yolo-status error";
+          yoloStatus.firstElementChild.textContent = "YOLO: status unavailable";
+          yoloMetrics.textContent = "";
+        });
+    }, 250);
+
+    window.addEventListener("resize", resizeOverlay);
+    frontVideo.addEventListener("load", resizeOverlay);
+  </script>
+</body>
+</html>

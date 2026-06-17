@@ -1,0 +1,10 @@
+# JeepBot requirements
+pygame
+pyserial
+flask
+opencv-python
+depthai
+
+# For autonomous training (install on training machine or Jetson, not necessarily Pi)
+# tensorflow>=2.13
+# numpy

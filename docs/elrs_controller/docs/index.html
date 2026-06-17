@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JeepBot ELRS Controller — Setup Guide</title>
+<meta name="description" content="Flash a RadioMaster ExpressLRS TX/RX pair and turn an Arduino Leonardo into a USB joystick for DonkeyCar." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0B0F14;
+    --surface:#131A22;
+    --raised:#182230;
+    --line:#222D38;
+    --line-soft:#1A222C;
+    --txt:#EAF0F6;
+    --muted:#8B98A8;
+    --faint:#5A6675;
+    --sig:#FFB627;       /* transmitter amber */
+    --sig-dim:#7a5a14;
+    --data:#2DD4BF;      /* live signal cyan */
+    --danger:#FF5D5D;
+    --maxw:1180px;
+    --nav:268px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--txt);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;
+    font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(1100px 520px at 82% -8%, rgba(255,182,39,.07), transparent 60%),
+      radial-gradient(900px 600px at -5% 12%, rgba(45,212,191,.05), transparent 55%);
+  }
+  a{color:var(--data);text-decoration:none}
+  a:hover{text-decoration:underline}
+  ::selection{background:rgba(255,182,39,.28)}
+  code,kbd,pre,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+
+  /* ---------- Layout shell ---------- */
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px}
+  .shell{display:grid;grid-template-columns:var(--nav) 1fr;gap:0;max-width:var(--maxw);margin:0 auto}
+
+  /* ---------- Sidebar ---------- */
+  aside{
+    position:sticky;top:0;height:100vh;align-self:start;
+    border-right:1px solid var(--line);padding:26px 20px 26px 28px;overflow-y:auto;
+  }
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+  .brand .dot{width:11px;height:11px;border-radius:50%;background:var(--sig);
+    box-shadow:0 0 0 3px rgba(255,182,39,.16);flex:0 0 auto}
+  .brand b{font-family:"Chakra Petch";font-weight:700;letter-spacing:.04em;font-size:15px}
+  .brand small{display:block;color:var(--faint);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;font-family:"IBM Plex Mono"}
+  nav.toc{margin-top:26px;display:flex;flex-direction:column;gap:1px}
+  nav.toc a{
+    display:flex;align-items:baseline;gap:11px;color:var(--muted);
+    padding:8px 10px;border-radius:7px;font-size:14px;line-height:1.3;
+    border-left:2px solid transparent;text-decoration:none;transition:.15s;
+  }
+  nav.toc a .n{font-family:"IBM Plex Mono";font-size:11px;color:var(--faint);min-width:20px}
+  nav.toc a:hover{background:var(--surface);color:var(--txt)}
+  nav.toc a.active{color:var(--sig);border-left-color:var(--sig);background:rgba(255,182,39,.06)}
+  nav.toc a.active .n{color:var(--sig)}
+  .toc-sep{height:1px;background:var(--line);margin:14px 6px}
+  aside .ghlink{margin-top:20px;font-size:12.5px;color:var(--faint)}
+
+  /* ---------- Main column ---------- */
+  main{min-width:0;padding:0 0 120px}
+  .pad{padding:0 40px}
+  section{scroll-margin-top:24px}
+
+  /* ---------- Hero ---------- */
+  header.hero{padding:64px 40px 40px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:"IBM Plex Mono";font-size:12px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--sig);margin:0 0 18px}
+  .hero h1{font-family:"Chakra Petch";font-weight:700;line-height:1.04;
+    font-size:clamp(34px,5.2vw,58px);letter-spacing:-.01em;margin:0 0 18px}
+  .hero h1 .acc{color:var(--sig)}
+  .hero p.lede{font-size:18px;color:var(--muted);max-width:60ch;margin:0 0 30px}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+  .chip{font-family:"IBM Plex Mono";font-size:12.5px;color:var(--txt);
+    background:var(--surface);border:1px solid var(--line);border-radius:999px;
+    padding:6px 13px;display:inline-flex;align-items:center;gap:8px}
+  .chip b{color:var(--sig);font-weight:600}
+  .chip .data{color:var(--data)}
+
+  /* ---------- Signal chain (signature) ---------- */
+  .chain-wrap{padding:40px;border-bottom:1px solid var(--line)}
+  .chain-cap{font-family:"IBM Plex Mono";font-size:11.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--faint);margin:0 0 18px}
+  .chain{display:flex;align-items:stretch;gap:0;width:100%;
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+  .node{flex:1 1 0;min-width:0;padding:20px 16px;position:relative;text-align:center}
+  .node + .node{border-left:1px dashed var(--line)}
+  .node .ic{font-family:"IBM Plex Mono";font-size:11px;color:var(--data);
+    letter-spacing:.1em;margin-bottom:9px}
+  .node h4{font-family:"Chakra Petch";font-weight:600;font-size:15px;margin:0 0 4px}
+  .node small{display:block;color:var(--muted);font-size:12.5px;line-height:1.4}
+  .node .glyph{font-size:22px;margin-bottom:8px;filter:saturate(.8)}
+  .pulse{position:absolute;top:0;left:0;height:2px;width:100%;
+    background:linear-gradient(90deg,transparent,var(--sig),transparent);
+    opacity:0;animation:run 6s linear infinite}
+  .node:nth-child(1) .pulse{animation-delay:0s}
+  .node:nth-child(2) .pulse{animation-delay:1.2s}
+  .node:nth-child(3) .pulse{animation-delay:2.4s}
+  .node:nth-child(4) .pulse{animation-delay:3.6s}
+  @keyframes run{0%{opacity:0;transform:translateX(-60%)}8%{opacity:1}
+    50%{opacity:1}92%{opacity:1;transform:translateX(60%)}100%{opacity:0;transform:translateX(60%)}}
+  .link-lbl{display:block;font-family:"IBM Plex Mono";font-size:10.5px;
+    color:var(--sig);letter-spacing:.08em;margin-top:10px}
+
+  /* ---------- Generic content ---------- */
+  .block{padding:48px 40px;border-bottom:1px solid var(--line)}
+  .step-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 8px}
+  .step-num{font-family:"Chakra Petch";font-weight:700;font-size:14px;color:var(--bg);
+    background:var(--sig);width:34px;height:34px;border-radius:9px;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;margin-top:4px}
+  h2{font-family:"Chakra Petch";font-weight:700;font-size:clamp(23px,3vw,30px);
+    letter-spacing:-.01em;margin:0;line-height:1.15}
+  h2 .sub{display:block;font-family:"IBM Plex Mono";font-size:12px;font-weight:500;
+    color:var(--faint);letter-spacing:.14em;text-transform:uppercase;margin-top:7px}
+  h3{font-family:"Chakra Petch";font-weight:600;font-size:18px;margin:34px 0 12px}
+  .block > p{color:var(--muted);max-width:72ch}
+  .block p strong, li strong{color:var(--txt);font-weight:600}
+  .lead-in{margin-left:52px}
+
+  /* ---------- Fielded list (key:value config) ---------- */
+  .fields{list-style:none;padding:0;margin:18px 0 0;border:1px solid var(--line);
+    border-radius:12px;overflow:hidden}
+  .fields li{display:grid;grid-template-columns:230px 1fr;gap:0;
+    border-top:1px solid var(--line-soft);font-size:14.5px}
+  .fields li:first-child{border-top:none}
+  .fields .k{background:var(--surface);padding:11px 16px;color:var(--muted);
+    font-family:"IBM Plex Mono";font-size:13px;border-right:1px solid var(--line)}
+  .fields .v{padding:11px 16px;color:var(--txt)}
+  .fields .v code{color:var(--sig);background:rgba(255,182,39,.08);
+    padding:2px 7px;border-radius:5px;font-size:13px}
+
+  /* ---------- Ordered steps ---------- */
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:18px 0 0}
+  ol.steps li{position:relative;padding:0 0 16px 40px;color:var(--muted);max-width:72ch}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:-2px;
+    font-family:"IBM Plex Mono";font-size:12px;color:var(--data);
+    border:1px solid var(--line);border-radius:7px;width:26px;height:26px;
+    display:flex;align-items:center;justify-content:center;background:var(--surface)}
+  ol.steps li:not(:last-child)::after{content:"";position:absolute;left:13px;top:26px;
+    bottom:2px;width:1px;background:var(--line)}
+  ul.plain{padding-left:20px;color:var(--muted)}
+  ul.plain li{margin:6px 0}
+
+  /* ---------- Code blocks ---------- */
+  .code{position:relative;margin:16px 0 0;border:1px solid var(--line);
+    border-radius:11px;background:#0C1118;overflow:hidden}
+  .code-bar{display:flex;align-items:center;justify-content:space-between;
+    padding:8px 12px 8px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+  .code-bar .fn{font-family:"IBM Plex Mono";font-size:12px;color:var(--muted)}
+  .copy{font-family:"IBM Plex Mono";font-size:11.5px;color:var(--muted);
+    background:transparent;border:1px solid var(--line);border-radius:6px;
+    padding:4px 10px;cursor:pointer;transition:.15s}
+  .copy:hover{color:var(--sig);border-color:var(--sig-dim)}
+  .copy.ok{color:var(--data);border-color:var(--data)}
+  pre{margin:0;padding:15px 16px;overflow-x:auto;font-size:13.3px;line-height:1.7}
+  pre code{color:#cdd6e0}
+  .tok-c{color:var(--faint)}      /* comment */
+  .tok-p{color:var(--sig)}        /* prompt / key */
+  .tok-s{color:var(--data)}       /* string/value */
+  .tok-k{color:#c792ea}           /* keyword */
+
+  /* ---------- Channel-map table ---------- */
+  .tbl-scroll{overflow-x:auto;margin-top:18px;border:1px solid var(--line);border-radius:12px}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+  thead th{text-align:left;font-family:"IBM Plex Mono";font-size:11.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--faint);padding:12px 16px;background:var(--surface);
+    border-bottom:1px solid var(--line)}
+  tbody td{padding:11px 16px;border-bottom:1px solid var(--line-soft);color:var(--muted)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody td:first-child{color:var(--data);font-family:"IBM Plex Mono";font-size:13px}
+  tbody td b{color:var(--txt);font-weight:600}
+
+  /* ---------- Figures / screenshots ---------- */
+  figure.shot{margin:24px 0 0;border:1px solid var(--line);border-radius:12px;
+    overflow:hidden;background:var(--surface)}
+  figure.shot .frame{display:flex;align-items:center;gap:8px;padding:9px 14px;
+    border-bottom:1px solid var(--line);background:#0F151C}
+  figure.shot .frame i{width:10px;height:10px;border-radius:50%;background:var(--line);
+    display:inline-block}
+  figure.shot .frame i:nth-child(1){background:#3a4452}
+  figure.shot .frame .lbl{margin-left:6px;font-family:"IBM Plex Mono";font-size:12px;
+    color:var(--muted)}
+  figure.shot img{display:block;width:100%;height:auto}
+  figure.shot figcaption{padding:11px 16px;font-size:13px;color:var(--muted);
+    border-top:1px solid var(--line-soft);font-family:"IBM Plex Mono"}
+  figure.shot figcaption b{color:var(--data);font-weight:500}
+
+  /* ---------- Callouts ---------- */
+  .note{display:flex;gap:13px;margin:20px 0 0;padding:14px 16px;border-radius:11px;
+    background:var(--surface);border:1px solid var(--line);font-size:14px;color:var(--muted)}
+  .note .tag{font-family:"IBM Plex Mono";font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;flex:0 0 auto;font-weight:600}
+  .note.tip{border-left:3px solid var(--data)} .note.tip .tag{color:var(--data)}
+  .note.warn{border-left:3px solid var(--sig)} .note.warn .tag{color:var(--sig)}
+  .note.stop{border-left:3px solid var(--danger)} .note.stop .tag{color:var(--danger)}
+  .note code{color:var(--txt);background:#0C1118;padding:1px 6px;border-radius:4px;font-size:13px}
+
+  /* ---------- Footer ---------- */
+  footer{padding:40px;color:var(--faint);font-size:13px}
+  footer .mono{color:var(--muted)}
+
+  /* ---------- Mobile ---------- */
+  .menu-btn{display:none}
+  @media(max-width:920px){
+    .shell{grid-template-columns:1fr}
+    aside{position:fixed;z-index:40;top:0;left:0;width:84vw;max-width:320px;height:100vh;
+      background:var(--bg);transform:translateX(-102%);transition:transform .25s ease;
+      box-shadow:30px 0 60px rgba(0,0,0,.5)}
+    aside.open{transform:translateX(0)}
+    .menu-btn{display:flex;position:fixed;z-index:50;top:14px;left:14px;align-items:center;
+      gap:9px;background:var(--surface);border:1px solid var(--line);color:var(--txt);
+      border-radius:10px;padding:9px 13px;cursor:pointer;font-family:"IBM Plex Mono";font-size:13px}
+    .scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:35}
+    .scrim.open{display:block}
+    header.hero{padding-top:74px}
+    .pad,.block,.chain-wrap,header.hero,footer{padding-left:22px;padding-right:22px}
+    .lead-in{margin-left:0}
+    .chain{flex-direction:column}
+    .node + .node{border-left:none;border-top:1px dashed var(--line)}
+    .fields li{grid-template-columns:1fr}
+    .fields .k{border-right:none;border-bottom:1px solid var(--line)}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .pulse{animation:none;opacity:.4}
+    html{scroll-behavior:auto}
+  }
+  :focus-visible{outline:2px solid var(--sig);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<button class="menu-btn" id="menuBtn" aria-label="Open navigation">☰ Steps</button>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <!-- ================= SIDEBAR ================= -->
+  <aside id="aside">
+    <div class="brand">
+      <span class="dot"></span>
+      <div><b>JEEPBOT&nbsp;ELRS</b><small>controller&nbsp;setup</small></div>
+    </div>
+    <nav class="toc" id="toc">
+      <a href="#overview"><span class="n">00</span><span>Overview</span></a>
+      <a href="#hardware"><span class="n">·</span><span>Hardware &amp; parts</span></a>
+      <div class="toc-sep"></div>
+      <a href="#tx"><span class="n">01</span><span>Flash the transmitter</span></a>
+      <a href="#rx"><span class="n">02</span><span>Flash the receiver</span></a>
+      <a href="#wiring"><span class="n">03</span><span>Wire RX → Leonardo</span></a>
+      <a href="#firmware"><span class="n">04</span><span>Build &amp; upload firmware</span></a>
+      <a href="#donkeycar"><span class="n">05</span><span>DonkeyCar integration</span></a>
+      <div class="toc-sep"></div>
+      <a href="#channels"><span class="n">·</span><span>Channel map</span></a>
+      <a href="#troubleshooting"><span class="n">·</span><span>Troubleshooting</span></a>
+    </nav>
+    <div class="ghlink">Source &amp; firmware on <a href="../">GitHub</a></div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main>
+    <header class="hero" id="top">
+      <p class="eyebrow">UCSD RoboCar · Radio link setup</p>
+      <h1>Turn an ExpressLRS radio into a <span class="acc">USB joystick</span> for DonkeyCar.</h1>
+      <p class="lede">A step-by-step guide to flash a RadioMaster ELRS transmitter &amp; receiver, wire the receiver to an Arduino Leonardo, and have the whole rig show up as a plug-and-play game controller on your Raspberry Pi.</p>
+      <div class="meta-row">
+        <span class="chip">Binding phrase <b>JEEPBOT</b></span>
+        <span class="chip">ELRS <b>v4.0.1</b></span>
+        <span class="chip">Board <span class="data">Arduino Leonardo</span></span>
+        <span class="chip">Output <span class="data">USB HID joystick</span></span>
+      </div>
+    </header>
+
+    <!-- ===== Signature: signal chain ===== -->
+    <div class="chain-wrap">
+      <p class="chain-cap">// signal flow — sticks in your hand to steering on the car</p>
+      <div class="chain" role="img" aria-label="Signal flow from transmitter to receiver to Arduino Leonardo to Raspberry Pi">
+        <div class="node"><span class="pulse"></span>
+          <div class="glyph">🎮</div><div class="ic">SOURCE</div>
+          <h4>RadioMaster TX</h4><small>Pocket internal 2.4&nbsp;GHz</small>
+          <span class="link-lbl">2.4 GHz ELRS</span>
+        </div>
+        <div class="node"><span class="pulse"></span>
+          <div class="glyph">📡</div><div class="ic">LINK</div>
+          <h4>RP4TD RX</h4><small>True-diversity receiver</small>
+          <span class="link-lbl">serial @ 115200</span>
+        </div>
+        <div class="node"><span class="pulse"></span>
+          <div class="glyph">🧩</div><div class="ic">TRANSLATE</div>
+          <h4>Arduino Leonardo</h4><small>SBUS → HID firmware</small>
+          <span class="link-lbl">USB HID</span>
+        </div>
+        <div class="node"><span class="pulse"></span>
+          <div class="glyph">🤖</div><div class="ic">CONSUME</div>
+          <h4>Raspberry Pi</h4><small>DonkeyCar /dev/input/js0</small>
+          <span class="link-lbl">drives the car</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 00 Overview ===== -->
+    <section id="overview" class="block">
+      <h2>Overview <span class="sub">What you're building</span></h2>
+      <p style="margin-top:18px">ExpressLRS gives you a rock-solid, low-latency 2.4&nbsp;GHz link between a handheld transmitter and a tiny receiver on the vehicle. The catch: the receiver speaks a serial radio protocol, not USB — so a Raspberry Pi can't read it directly.</p>
+      <p>This project bridges that gap. An <strong>Arduino Leonardo</strong> reads the receiver's serial stream, smooths and decodes every stick, switch, and button, then re-presents all of it to the Pi as an ordinary <strong>USB game controller</strong>. DonkeyCar already knows how to read a joystick at <code class="mono" style="color:var(--data)">/dev/input/js0</code>, so once it's flashed you just plug in and drive.</p>
+      <p>You'll do five things, in order:</p>
+      <ol class="steps">
+        <li><strong>Flash the transmitter</strong> with ELRS firmware and the <code class="mono">JEEPBOT</code> binding phrase.</li>
+        <li><strong>Flash the receiver</strong> with the matching phrase and set its serial output.</li>
+        <li><strong>Wire the receiver</strong> to the Leonardo's hardware serial port.</li>
+        <li><strong>Build &amp; upload</strong> the SBUS-to-joystick firmware with PlatformIO.</li>
+        <li><strong>Point DonkeyCar</strong> at the new controller with the included joystick part.</li>
+      </ol>
+    </section>
+
+    <!-- ===== Hardware ===== -->
+    <section id="hardware" class="block">
+      <h2>Hardware &amp; parts <span class="sub">Bill of materials</span></h2>
+      <p style="margin-top:18px">This guide is written for the exact RadioMaster combo used on JeepBot, but the firmware works with any ELRS receiver that can output a serial stream the Leonardo can read.</p>
+      <ul class="plain">
+        <li><strong>Transmitter</strong> — RadioMaster Pocket with internal 2.4&nbsp;GHz module, running EdgeTX</li>
+        <li><strong>Receiver</strong> — RadioMaster RP4TD True-Diversity 2.4&nbsp;GHz</li>
+        <li><strong>Microcontroller</strong> — Arduino Leonardo (the USB-HID capability is required; an Uno will not work)</li>
+        <li><strong>Host</strong> — Raspberry Pi running DonkeyCar</li>
+        <li>3 jumper wires (signal / 5V / GND) and a USB cable for the Leonardo</li>
+      </ul>
+      <div class="note tip"><span class="tag">Why Leonardo</span><span>The Leonardo's ATmega32U4 can natively emulate USB devices like keyboards and joysticks. An Uno's USB chip can't, which is why the firmware targets the Leonardo specifically.</span></div>
+      <h3>Tools you'll install</h3>
+      <ul class="plain">
+        <li><a href="https://www.expresslrs.org/quick-start/getting-started/" target="_blank" rel="noopener">ExpressLRS Configurator</a> — flashes both the TX and RX</li>
+        <li><a href="https://platformio.org/" target="_blank" rel="noopener">PlatformIO</a> (VS Code extension) — builds and uploads the Leonardo firmware</li>
+      </ul>
+    </section>
+
+    <!-- ===== 01 TX ===== -->
+    <section id="tx" class="block">
+      <div class="step-head">
+        <span class="step-num">01</span>
+        <h2>Flash the transmitter <span class="sub">ExpressLRS Configurator → TX</span></h2>
+      </div>
+      <div class="lead-in">
+        <p>Open the ExpressLRS Configurator and select the release and target shown below. The binding phrase is what pairs the TX and RX — it <strong>must be identical on both</strong>.</p>
+        <ul class="fields">
+          <li><span class="k">Release</span><span class="v"><code>4.0.1</code></span></li>
+          <li><span class="k">Device category</span><span class="v">RadioMaster 2.4&nbsp;GHz</span></li>
+          <li><span class="k">Device</span><span class="v">RadioMaster Pocket Internal 2.4&nbsp;GHz TX</span></li>
+          <li><span class="k">Flashing method</span><span class="v">EdgeTX Passthrough</span></li>
+          <li><span class="k">Binding phrase</span><span class="v"><code>JEEPBOT</code></span></li>
+          <li><span class="k">Regulatory domain</span><span class="v">2.4&nbsp;GHz ISM (Standard)</span></li>
+          <li><span class="k">Wi-Fi SSID</span><span class="v"><code>UCSDRoboCar</code></span></li>
+          <li><span class="k">Wi-Fi password</span><span class="v"><code>UCSDrobocars2018</code></span></li>
+        </ul>
+        <h3>Steps</h3>
+        <ol class="steps">
+          <li>Set the fields above. Leave <strong>2.4&nbsp;GHz ISM (Standard)</strong> checked under regulatory domains.</li>
+          <li>Click <strong>Build</strong>. The Configurator produces a firmware file — note where it saves.</li>
+          <li>Copy that file onto the <strong>SD card</strong> of the transmitter.</li>
+          <li>On the radio, run the EdgeTX flashing tool (or the downloaded Lua script) to flash from the SD card.</li>
+        </ol>
+        <div class="note warn"><span class="tag">If passthrough fails</span><span>You can pick the serial port by hand. On the test rig this was <code>/dev/tty.usbmodem0000000000001B1</code> — yours will differ. Plug the radio in, check which port appears, and select it manually.</span></div>
+        <figure class="shot">
+          <div class="frame"><i></i><i></i><i></i><span class="lbl">ExpressLRS Configurator — TX target</span></div>
+          <img src="assets/tx-config.png" alt="ExpressLRS Configurator showing the transmitter settings: release 4.0.1, RadioMaster Pocket Internal 2.4GHz TX, EdgeTX Passthrough, 2.4GHz ISM, Wi-Fi SSID UCSDRoboCar" loading="lazy" />
+          <figcaption>Reference: the TX target with <b>EdgeTX Passthrough</b> and <b>2.4 GHz ISM</b> selected.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===== 02 RX ===== -->
+    <section id="rx" class="block">
+      <div class="step-head">
+        <span class="step-num">02</span>
+        <h2>Flash the receiver <span class="sub">ExpressLRS Configurator → RX (Wi-Fi)</span></h2>
+      </div>
+      <div class="lead-in">
+        <p>The receiver is flashed over Wi-Fi. You build the firmware file first, then connect to the receiver's own access point and upload it.</p>
+        <ul class="fields">
+          <li><span class="k">Release</span><span class="v"><code>4.0.1</code></span></li>
+          <li><span class="k">Device category</span><span class="v">RadioMaster 2.4&nbsp;GHz</span></li>
+          <li><span class="k">Device</span><span class="v">RadioMaster RP4TD True Diversity 2.4&nbsp;GHz RX</span></li>
+          <li><span class="k">Flashing method</span><span class="v">Wi-Fi</span></li>
+          <li><span class="k">Binding phrase</span><span class="v"><code>JEEPBOT</code> &nbsp;<span style="color:var(--faint)">(same as TX)</span></span></li>
+        </ul>
+        <h3>Steps</h3>
+        <ol class="steps">
+          <li>Set the fields above and click <strong>Build</strong> — <strong>save the file</strong> to disk (don't try to flash directly yet).</li>
+          <li>Power the receiver and let it boot into Wi-Fi mode, then connect your computer to its access point: SSID <code class="mono" style="color:var(--sig)">ExpressLRS RX</code>, password <code class="mono" style="color:var(--sig)">expresslrs</code>.</li>
+          <li>Open the receiver's web page, <strong>upload the saved firmware file</strong>, and flash.</li>
+          <li>In the receiver's settings, set the <strong>serial protocol</strong> and <strong>baud rate 115200</strong>, then <strong>restart</strong> the receiver.</li>
+        </ol>
+        <div class="note warn"><span class="tag">Must match the firmware</span><span>The Leonardo firmware reads the receiver on hardware serial at <code>115200</code> baud. Whatever serial protocol and baud you set on the receiver has to match that, or the Leonardo will see garbage. If you change the firmware's baud, change it here too.</span></div>
+        <figure class="shot">
+          <div class="frame"><i></i><i></i><i></i><span class="lbl">ExpressLRS Configurator — RX target</span></div>
+          <img src="assets/rx-config.png" alt="ExpressLRS Configurator showing the receiver settings: release 4.0.1, RadioMaster RP4TD True Diversity 2.4GHz RX, Wi-Fi flashing method, 2.4GHz ISM, binding phrase enabled" loading="lazy" />
+          <figcaption>Reference: the RX target with the <b>Wi-Fi</b> flashing method and binding phrase enabled.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===== 03 Wiring ===== -->
+    <section id="wiring" class="block">
+      <div class="step-head">
+        <span class="step-num">03</span>
+        <h2>Wire RX → Leonardo <span class="sub">Three wires</span></h2>
+      </div>
+      <div class="lead-in">
+        <p>The firmware reads the receiver on the Leonardo's <strong>hardware serial port (Serial1)</strong>, which is pin&nbsp;0&nbsp;(RX). That keeps the USB serial free for the joystick. Connect the receiver's serial output pad to pin&nbsp;0, and share power and ground.</p>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>Receiver</th><th>Arduino Leonardo</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td>Serial out (TX pad)</td><td><b>Pin 0 — RX1 / Serial1</b></td><td>The signal line the firmware listens on</td></tr>
+              <tr><td>5V / VCC</td><td><b>5V</b></td><td>Powers the receiver from the Leonardo</td></tr>
+              <tr><td>GND</td><td><b>GND</b></td><td>Common ground — required</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:20px">Then connect the Leonardo to the Raspberry Pi over USB. That single cable both powers the Leonardo and carries the joystick data to the Pi.</p>
+        <div class="note tip"><span class="tag">Pin 8</span><span>The firmware also drives <code>pin 8</code> HIGH whenever a trigger button is held — handy for an indicator LED or to switch an external circuit. Leave it unconnected if you don't need it.</span></div>
+      </div>
+    </section>
+
+    <!-- ===== 04 Firmware ===== -->
+    <section id="firmware" class="block">
+      <div class="step-head">
+        <span class="step-num">04</span>
+        <h2>Build &amp; upload firmware <span class="sub">PlatformIO</span></h2>
+      </div>
+      <div class="lead-in">
+        <p>The firmware and all three libraries it needs (<code class="mono">Joystick</code>, <code class="mono">FUTABA_SBUS</code>, <code class="mono">Streaming</code>) are vendored in this repo's <code class="mono">lib/</code> folder, so there's nothing extra to install. Open the project in VS Code with the PlatformIO extension, or use the CLI:</p>
+        <div class="code">
+          <div class="code-bar"><span class="fn">terminal</span><button class="copy">Copy</button></div>
+<pre><code><span class="tok-c"># clone the repo and enter it</span>
+git clone https://github.com/<span class="tok-p">&lt;your-username&gt;</span>/JeepBot-ELRS-Controller.git
+<span class="tok-k">cd</span> JeepBot-ELRS-Controller
+
+<span class="tok-c"># build for the Leonardo, then upload (board plugged in over USB)</span>
+pio run
+pio run <span class="tok-p">--target</span> upload</code></pre>
+        </div>
+        <p style="margin-top:24px">The target board is already set in <code class="mono">platformio.ini</code>:</p>
+        <div class="code">
+          <div class="code-bar"><span class="fn">platformio.ini</span><button class="copy">Copy</button></div>
+<pre><code><span class="tok-p">[env:leonardo]</span>
+platform <span class="tok-k">=</span> <span class="tok-s">atmelavr</span>
+board    <span class="tok-k">=</span> <span class="tok-s">leonardo</span>
+framework <span class="tok-k">=</span> <span class="tok-s">arduino</span>
+<span class="tok-c">; build_flags = -DDEBUG_LOG</span></code></pre>
+        </div>
+        <h3>Debug logging (optional)</h3>
+        <p>By default the firmware emits <strong>no</strong> serial output, because Serial and USB-HID can fight on this board. If you need to watch raw channel values while testing, uncomment the build flag — then comment it back out for normal use.</p>
+        <div class="code">
+          <div class="code-bar"><span class="fn">platformio.ini</span><button class="copy">Copy</button></div>
+<pre><code><span class="tok-p">[env:leonardo]</span>
+<span class="tok-c">; ...</span>
+build_flags <span class="tok-k">=</span> <span class="tok-s">-DDEBUG_LOG</span></code></pre>
+        </div>
+        <div class="note stop"><span class="tag">Important</span><span>Don't leave <code>-DDEBUG_LOG</code> enabled in normal operation. On the Leonardo the debug Serial can conflict with the USB joystick interface — enable it only while actively debugging.</span></div>
+        <h3>How the firmware reads the sticks</h3>
+        <p>Every channel is run through a small filter stack before it becomes a joystick value: a 9-sample rolling average, an exponential moving average, and a median-of-3 prefilter. Switches and buttons add enter/exit hysteresis plus a 3-reading debounce, so a switch resting near a threshold won't flicker. You don't need to touch any of this — it's tuned — but it's why the controls feel steady rather than jittery.</p>
+      </div>
+    </section>
+
+    <!-- ===== 05 DonkeyCar ===== -->
+    <section id="donkeycar" class="block">
+      <div class="step-head">
+        <span class="step-num">05</span>
+        <h2>DonkeyCar integration <span class="sub">my_joystick.py</span></h2>
+      </div>
+      <div class="lead-in">
+        <p>Once the Leonardo is flashed it appears as a standard joystick on the Pi. The repo includes <code class="mono">donkeycar_joystick/my_joystick.py</code>, which maps that controller's axes and buttons onto DonkeyCar actions.</p>
+        <ol class="steps">
+          <li>Copy <code class="mono">my_joystick.py</code> into your DonkeyCar project (next to <code class="mono">manage.py</code> is fine).</li>
+          <li>Confirm the controller is present on the Pi:</li>
+        </ol>
+        <div class="code" style="margin-left:40px">
+          <div class="code-bar"><span class="fn">raspberry pi · terminal</span><button class="copy">Copy</button></div>
+<pre><code><span class="tok-c"># the Leonardo should show up here once plugged in</span>
+ls /dev/input/js*
+<span class="tok-c"># → /dev/input/js0</span></code></pre>
+        </div>
+        <ol class="steps" start="3" style="counter-reset:s 2">
+          <li>Point DonkeyCar at the custom controller. In <code class="mono">myconfig.py</code> use the joystick controller and load <code class="mono">MyJoystickController</code> from the file you copied. Then launch as usual with <code class="mono">python manage.py drive</code>.</li>
+        </ol>
+        <h3>What the buttons do</h3>
+        <p>The switch/button mapping defined in <code class="mono">my_joystick.py</code>:</p>
+        <div class="tbl-scroll">
+          <table>
+            <thead><tr><th>Control</th><th>DonkeyCar action</th></tr></thead>
+            <tbody>
+              <tr><td>SE_2</td><td><b>Toggle drive mode</b> (manual / local / pilot)</td></tr>
+              <tr><td>SE_3</td><td><b>Erase last N records</b></td></tr>
+              <tr><td>SE_4</td><td><b>Toggle manual recording</b></td></tr>
+              <tr><td>SE_6</td><td><b>Toggle constant throttle</b></td></tr>
+              <tr><td>SE_8</td><td><b>Emergency stop</b></td></tr>
+              <tr><td>Rudder axis</td><td><b>Steering</b></td></tr>
+              <tr><td>Elevator axis</td><td><b>Throttle</b> (inverted)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note tip"><span class="tag">SE_n explained</span><span>The SE button does different jobs depending on the combination of the two 3-position switches — that combo selects which of buttons 2–10 the press lands on. So a single physical button gives you nine distinct actions.</span></div>
+      </div>
+    </section>
+
+    <!-- ===== Channel map ===== -->
+    <section id="channels" class="block">
+      <h2>Channel map <span class="sub">SBUS channel → joystick output</span></h2>
+      <p style="margin-top:18px">Reference for how the firmware assigns each incoming channel. SBUS indices are 0-based, matching <code class="mono">sBus.channels[N]</code> in <code class="mono">main.cpp</code>. If your transmitter's channel order differs, this is the table to edit.</p>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>SBUS&nbsp;index</th><th>Source on radio</th><th>Joystick output</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>Right stick — horizontal</td><td><b>Rx axis</b></td></tr>
+            <tr><td>1</td><td>Right stick — vertical</td><td><b>Ry axis</b></td></tr>
+            <tr><td>2</td><td>Left stick — vertical</td><td><b>Y axis</b></td></tr>
+            <tr><td>3</td><td>Left stick — horizontal</td><td><b>X axis</b></td></tr>
+            <tr><td>4</td><td>Left button</td><td><b>Button 0</b></td></tr>
+            <tr><td>5</td><td>Left 3-position switch</td><td><b>Throttle axis</b> + mode select</td></tr>
+            <tr><td>6</td><td>Right 3-position switch</td><td><b>Rudder axis</b> + mode select</td></tr>
+            <tr><td>7</td><td>Right button</td><td><b>Button 1</b></td></tr>
+            <tr><td>8</td><td>SE button</td><td><b>Buttons 2–10</b> (by switch combo)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===== Troubleshooting ===== -->
+    <section id="troubleshooting" class="block" style="border-bottom:none">
+      <h2>Troubleshooting <span class="sub">When it doesn't just work</span></h2>
+
+      <h3>The car won't bind / no link</h3>
+      <p>The binding phrase must be byte-identical on TX and RX — it's case-sensitive. Re-flash whichever side is wrong with <code class="mono">JEEPBOT</code>. Both must also be on the same release (<code class="mono">4.0.1</code>) and the same regulatory domain (2.4&nbsp;GHz ISM).</p>
+
+      <h3>No /dev/input/js0 on the Pi</h3>
+      <p>That device only appears if the Leonardo is enumerating as a USB joystick. Confirm the firmware uploaded successfully, the USB cable is data-capable (not charge-only), and that <code class="mono">-DDEBUG_LOG</code> is <em>not</em> enabled — debug Serial can suppress the HID interface on this board.</p>
+
+      <h3>Sticks read garbage or stay centered</h3>
+      <p>Almost always a serial mismatch. Check three things: the receiver's serial pad goes to Leonardo <strong>pin 0 (Serial1)</strong>, GND is shared, and the receiver's serial baud is <code class="mono">115200</code> to match the firmware.</p>
+
+      <h3>A switch flickers between positions</h3>
+      <p>It shouldn't — the firmware debounces with hysteresis. If it does, your transmitter's channel endpoints may be off; make sure the switch travels the full range in the radio's mixer so it clears the enter/exit thresholds.</p>
+
+      <h3>I want to see raw values</h3>
+      <p>Temporarily enable <code class="mono">build_flags = -DDEBUG_LOG</code> in <code class="mono">platformio.ini</code>, re-upload, and open a serial monitor at 115200. Remember to disable it afterward.</p>
+    </section>
+
+    <footer>
+      <div class="mono">JeepBot · ELRS controller setup guide</div>
+      <div style="margin-top:6px">Firmware reads SBUS on Serial1 @ 115200 → emulates a USB HID joystick → DonkeyCar. Binding phrase <code class="mono" style="color:var(--sig)">JEEPBOT</code>.</div>
+    </footer>
+  </main>
+</div>
+
+<script>
+  // ----- copy buttons -----
+  document.querySelectorAll('.copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var pre = btn.closest('.code').querySelector('pre');
+      var text = pre.innerText.replace(/^\s*[\u2192].*$/gm,'').trim(); // drop "→" output lines
+      navigator.clipboard.writeText(text).then(function(){
+        var old = btn.textContent; btn.textContent='Copied'; btn.classList.add('ok');
+        setTimeout(function(){ btn.textContent=old; btn.classList.remove('ok'); },1400);
+      });
+    });
+  });
+
+  // ----- mobile nav -----
+  var aside=document.getElementById('aside'), scrim=document.getElementById('scrim'),
+      mb=document.getElementById('menuBtn');
+  function toggle(open){ aside.classList.toggle('open',open); scrim.classList.toggle('open',open); }
+  mb.addEventListener('click',function(){ toggle(!aside.classList.contains('open')); });
+  scrim.addEventListener('click',function(){ toggle(false); });
+
+  // ----- scroll-spy -----
+  var links=[].slice.call(document.querySelectorAll('#toc a'));
+  var map={}; links.forEach(function(a){ map[a.getAttribute('href').slice(1)]=a; });
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(l){ l.classList.remove('active'); });
+        if(map[e.target.id]) map[e.target.id].classList.add('active');
+      }
+    });
+  },{rootMargin:'-20% 0px -72% 0px'});
+  document.querySelectorAll('main section[id]').forEach(function(s){ obs.observe(s); });
+
+  // close mobile drawer after picking a link
+  links.forEach(function(a){ a.addEventListener('click',function(){ if(window.innerWidth<=920) toggle(false); }); });
+</script>
+</body>
+</html>

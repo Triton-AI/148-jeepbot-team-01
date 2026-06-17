@@ -1,0 +1,7 @@
+# ================================================
+# Install on your laptop/desktop/Jetson for training
+# pip install -r requirements_train.txt
+# ================================================
+numpy
+opencv-python
+tensorflow

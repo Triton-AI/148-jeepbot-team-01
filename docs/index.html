@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JeepBot Setup Guide</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- Top Navigation -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">JB</div>
+      <div>
+        <strong>JeepBot</strong>
+        <span>VESC + Encoder + F710 Setup Guide</span>
+      </div>
+    </div>
+
+    <nav>
+      <a href="#overview">Overview</a>
+      <a href="#encoder">Encoder</a>
+      <a href="#vesc">VESC</a>
+      <a href="#pi">Raspberry Pi</a>
+      <a href="#run">Run</a>
+    </nav>
+  </header>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <input id="search" placeholder="Search sections..." />
+
+    <p class="side-label">Setup Steps</p>
+    <a href="#overview">01 Overview</a>
+    <a href="#encoder">02 Motor & Encoder Setup</a>
+    <a href="#vesc">03 VESC App Configuration</a>
+    <a href="#pid">04 PID Position Test</a>
+    <a href="#pi">05 Raspberry Pi Setup</a>
+    <a href="#laptop">06 Laptop Test Setup</a>
+    <a href="#run">07 Run on Raspberry Pi</a>
+    <a href="#troubleshoot">08 Troubleshooting</a>
+  </aside>
+
+  <main>
+    <!-- Hero / Overview -->
+    <section class="hero" id="overview">
+      <div class="badge">UCSD RoboCar • JeepBot</div>
+
+      <h1>
+        JeepBot Setup Guide<br />
+        <span>VESC, Encoder, F710 Controller & Raspberry Pi</span>
+      </h1>
+
+      <p class="lead">
+        This guide explains how to set up the JeepBot steering encoder, configure the VESCs,
+        install the required Python packages, connect the Logitech F710 controller, and run the
+        dual VESC control script on the Raspberry Pi.
+      </p>
+
+      <div class="chips">
+        <span>Raspberry Pi</span>
+        <span>VESC</span>
+        <span>Encoder</span>
+        <span>Logitech F710</span>
+        <span>PyVESC</span>
+      </div>
+    </section>
+
+    <!-- Requirements -->
+    <section class="card" id="requirements">
+      <div class="num">01</div>
+      <h2>Before You Start</h2>
+      <p>Make sure you have the main hardware and software ready before changing any VESC settings.</p>
+
+      <div class="grid two">
+        <div class="info"><span>Controller</span><code>Logitech F710</code></div>
+        <div class="info"><span>Computer</span><code>Raspberry Pi</code></div>
+        <div class="info"><span>Motor Controller</span><code>2x VESC</code></div>
+        <div class="info"><span>Python Packages</span><code>pyserial, pygame, PyVESC</code></div>
+      </div>
+    </section>
+
+    <!-- Encoder / Motor Setup -->
+    <section class="card" id="encoder">
+      <div class="num">02</div>
+      <h2>Motor & Encoder Setup</h2>
+      <p>
+        In VESC Tool, configure the steering VESC as a brushed DC motor and make sure the encoder
+        feedback is enabled.
+      </p>
+
+      <div class="steps">
+        <div>
+          <strong>Set motor type</strong>
+          <p>Go to <code>Motor Settings → General → Motor Type</code>.</p>
+          <p>Set it to <code>DC, Brushed Motor</code>.</p>
+        </div>
+
+        <div>
+          <strong>Adjust current limits</strong>
+          <p>
+            Set the motor and battery current limits based on your hardware. If the VESC red light
+            blinks or the battery cannot handle the load, lower the current values.
+          </p>
+        </div>
+      </div>
+
+      <img src="assets/setup1.png" alt="VESC Tool motor type and current settings" />
+    </section>
+
+    <!-- VESC App Config -->
+    <section class="card" id="vesc">
+      <div class="num">03</div>
+      <h2>VESC App Configuration</h2>
+      <p>
+        The Raspberry Pi sends commands to the VESC through serial, so the VESC app must be set to
+        UART. The steering VESC also needs the encoder selected as its position sensor.
+      </p>
+
+      <div class="steps">
+        <div>
+          <strong>Enable encoder feedback</strong>
+          <p>Go to <code>Additional Info → General → Position Sensor</code>.</p>
+          <p>Set <code>Position Sensor</code> to <code>Encoder</code>.</p>
+        </div>
+
+        <div>
+          <strong>Enable UART control</strong>
+          <p>Go to <code>App Settings → General</code>.</p>
+          <p>Set <code>App to Use</code> to <code>UART</code>.</p>
+        </div>
+
+        <div>
+          <strong>Save the settings</strong>
+          <p>Click <code>Write App Config</code> after changing the app settings.</p>
+        </div>
+      </div>
+
+      <img src="assets/setup2.png" alt="Encoder and UART VESC Tool setup" />
+      <img src="assets/setup3.png" alt="PID position real time data and PID tuning settings" />
+      <img src="assets/setup4.png" alt="Raspberry Pi setup config and laptop install notes" />
+    </section>
+
+    <!-- PID Setup -->
+    <section class="card" id="pid">
+      <div class="num">04</div>
+      <h2>PID Position Setup & Real-Time Test</h2>
+      <p>
+        Use VESC Tool real-time data to check if the steering encoder position changes correctly.
+        Then tune the PID values until the steering motor moves smoothly without shaking or overshooting.
+      </p>
+
+      <div class="steps">
+        <div>
+          <strong>Check encoder feedback</strong>
+          <p>Go to <code>Data Analysis → Real-time Data → PID Pos</code>.</p>
+          <p>Move the steering left and right and confirm the encoder value changes.</p>
+        </div>
+
+        <div>
+          <strong>Tune PID control</strong>
+          <p>Go to <code>Motor Settings → PID Control</code>.</p>
+          <p>Adjust PID values slowly until the steering response is smooth.</p>
+        </div>
+
+        <div>
+          <strong>Write both configs</strong>
+          <p>After tuning, click <code>Write Motor Config</code> and <code>Write App Config</code>.</p>
+        </div>
+      </div>
+
+      <img src="assets/setup5.png" alt="PID position test in VESC Tool" />
+      <img src="assets/setup6.png" alt="PID tuning and motor config settings" />
+    </section>
+
+    <!-- Raspberry Pi Setup -->
+    <section class="card" id="pi">
+      <div class="num">05</div>
+      <h2>Raspberry Pi Setup</h2>
+      <p>
+        Flash the Raspberry Pi SD card with the correct Raspberry Pi OS image. For this setup, use
+        the Legacy 64-bit image. After booting, connect the Pi to the JeepBot network and SSH into it.
+      </p>
+
+      <div class="grid two">
+        <div class="info"><span>Hostname</span><code>jeepbot</code></div>
+        <div class="info"><span>Username</span><code>jeepbot</code></div>
+        <div class="info"><span>WiFi SSID</span><code>UCSDRoboCar</code></div>
+        <div class="info"><span>IP Address</span><code>192.168.139.223</code></div>
+      </div>
+
+      <pre><code>ssh jeepbot@192.168.139.223</code></pre>
+    </section>
+
+    <!-- Laptop Setup -->
+    <section class="card" id="laptop">
+      <div class="num">06</div>
+      <h2>Test Setup on Laptop</h2>
+      <p>
+        Before running the full setup on the Raspberry Pi, you can install PyVESC and the required
+        packages on your laptop to check that the code environment is working.
+      </p>
+
+      <pre><code>git clone https://github.com/LiamBindle/PyVESC.git
+cd PyVESC
+pip install -e .
+
+cd ~/JeepBot_Vesc/dual_vesc_drive_package
+pip install -r requirements-steering.txt</code></pre>
+    </section>
+
+    <!-- Run on Raspberry Pi -->
+    <section class="card" id="run">
+      <div class="num">07</div>
+      <h2>Run on Raspberry Pi</h2>
+      <p>
+        After copying the JeepBot project folder to the Raspberry Pi, activate the Python environment,
+        go into the controller folder, install the required packages, and run the controller script.
+      </p>
+
+      <div class="steps">
+        <div>
+          <strong>Step 1: SSH into the Raspberry Pi</strong>
+          <pre><code>ssh jeepbot@192.168.139.223</code></pre>
+        </div>
+
+        <div>
+          <strong>Step 2: Activate the Python environment</strong>
+          <p>Use the environment that has your JeepBot packages installed.</p>
+          <pre><code>source ~/jeepbot/bin/activate</code></pre>
+          <p>If your project uses the old environment, use this instead:</p>
+          <pre><code>source ~/env/bin/activate</code></pre>
+        </div>
+
+        <div>
+          <strong>Step 3: Go to the JeepBot folder</strong>
+          <pre><code>cd ~/myjeepbot/mycar</code></pre>
+        </div>
+
+        <div>
+          <strong>Step 4: Install required packages</strong>
+          <pre><code>pip install pyserial pygame
+pip install -r requirements-steering.txt</code></pre>
+        </div>
+
+        <div>
+          <strong>Step 5: Test the F710 controller only</strong>
+          <p>This checks if the Logitech F710 is detected before moving the motors.</p>
+          <pre><code>python3 myconfig.py --dry-run --no-deadman</code></pre>
+        </div>
+
+        <div>
+          <strong>Step 6: List available VESC ports</strong>
+          <p>The VESCs should usually appear as <code>/dev/ttyACM0</code> and <code>/dev/ttyACM1</code>.</p>
+          <pre><code>python3 myconfig.py --list-ports</code></pre>
+        </div>
+
+        <div>
+          <strong>Step 7: Run JeepBot</strong>
+          <pre><code>python3 myconfig.py</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Troubleshooting -->
+    <section class="card" id="troubleshoot">
+      <div class="num">08</div>
+      <h2>Troubleshooting</h2>
+      <p>
+        Use these checks if the controller, VESC ports, steering, or drive motor does not work correctly.
+      </p>
+
+      <div class="steps">
+        <div>
+          <strong>Check VESC ports</strong>
+          <p>If the VESC is connected correctly, it should show up as <code>/dev/ttyACM0</code> or <code>/dev/ttyACM1</code>.</p>
+          <pre><code>python3 myconfig.py --list-ports
+ls /dev/ttyACM* /dev/ttyUSB*</code></pre>
+        </div>
+
+        <div>
+          <strong>Test controller input only</strong>
+          <p>This shows joystick axis values without moving the motors.</p>
+          <pre><code>python3 myconfig.py --dry-run --no-deadman</code></pre>
+        </div>
+
+        <div>
+          <strong>Test known working drive settings</strong>
+          <p>Use this if the drive motor does not spin with the default settings.</p>
+          <pre><code>python3 myconfig.py --no-deadman --drive-axis 3 --max-duty 0.30 --drive-ramp-duty-per-s 2.0</code></pre>
+        </div>
+
+        <div>
+          <strong>Fix inverted driving</strong>
+          <p>If forward and backward are reversed, test this option. Then update the same setting in <code>myconfig.py</code>.</p>
+          <pre><code>python3 myconfig.py --invert-drive</code></pre>
+        </div>
+
+        <div>
+          <strong>Swap VESC ports</strong>
+          <p>If steering and drive are connected to the wrong VESC, swap the ports. Then update the same port values in <code>myconfig.py</code>.</p>
+          <pre><code>python3 myconfig.py --steering-port /dev/ttyACM1 --drive-port /dev/ttyACM0</code></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

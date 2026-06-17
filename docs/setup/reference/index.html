@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JeepBot v6 — Setup Guide</title>
+<meta name="description" content="Fresh-start setup for JeepBot v6: environment, requirements, configuration, driving, and training the autonomous pilot." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0B0F14;--surface:#131A22;--raised:#182230;--line:#222D38;--line-soft:#1A222C;
+    --txt:#EAF0F6;--muted:#8B98A8;--faint:#5A6675;
+    --sig:#FFB627;--sig-dim:#7a5a14;--data:#2DD4BF;--danger:#FF5D5D;
+    --maxw:1180px;--nav:268px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--txt);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;
+    font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(1100px 520px at 82% -8%, rgba(255,182,39,.07), transparent 60%),
+      radial-gradient(900px 600px at -5% 12%, rgba(45,212,191,.05), transparent 55%);
+  }
+  a{color:var(--data);text-decoration:none}
+  a:hover{text-decoration:underline}
+  ::selection{background:rgba(255,182,39,.28)}
+  code,kbd,pre,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+
+  .shell{display:grid;grid-template-columns:var(--nav) 1fr;max-width:var(--maxw);margin:0 auto}
+
+  /* sidebar */
+  aside{position:sticky;top:0;height:100vh;align-self:start;
+    border-right:1px solid var(--line);padding:26px 20px 26px 28px;overflow-y:auto}
+  .brand{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+  .brand .dot{width:11px;height:11px;border-radius:50%;background:var(--sig);
+    box-shadow:0 0 0 3px rgba(255,182,39,.16);flex:0 0 auto}
+  .brand b{font-family:"Chakra Petch";font-weight:700;letter-spacing:.04em;font-size:15px}
+  .brand small{display:block;color:var(--faint);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;font-family:"IBM Plex Mono"}
+  nav.toc{margin-top:26px;display:flex;flex-direction:column;gap:1px}
+  nav.toc a{display:flex;align-items:baseline;gap:11px;color:var(--muted);
+    padding:8px 10px;border-radius:7px;font-size:14px;line-height:1.3;
+    border-left:2px solid transparent;text-decoration:none;transition:.15s}
+  nav.toc a .n{font-family:"IBM Plex Mono";font-size:11px;color:var(--faint);min-width:20px}
+  nav.toc a:hover{background:var(--surface);color:var(--txt)}
+  nav.toc a.active{color:var(--sig);border-left-color:var(--sig);background:rgba(255,182,39,.06)}
+  nav.toc a.active .n{color:var(--sig)}
+  .toc-sep{height:1px;background:var(--line);margin:14px 6px}
+  aside .ghlink{margin-top:20px;font-size:12.5px;color:var(--faint)}
+
+  main{min-width:0;padding:0 0 120px}
+  section{scroll-margin-top:24px}
+
+  /* hero */
+  header.hero{padding:64px 40px 40px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:"IBM Plex Mono";font-size:12px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--sig);margin:0 0 18px}
+  .hero h1{font-family:"Chakra Petch";font-weight:700;line-height:1.04;
+    font-size:clamp(34px,5.2vw,58px);letter-spacing:-.01em;margin:0 0 18px}
+  .hero h1 .acc{color:var(--sig)}
+  .hero p.lede{font-size:18px;color:var(--muted);max-width:62ch;margin:0 0 30px}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+  .chip{font-family:"IBM Plex Mono";font-size:12.5px;color:var(--txt);
+    background:var(--surface);border:1px solid var(--line);border-radius:999px;
+    padding:6px 13px;display:inline-flex;align-items:center;gap:8px}
+  .chip b{color:var(--sig);font-weight:600}.chip .data{color:var(--data)}
+
+  /* signature chain */
+  .chain-wrap{padding:40px;border-bottom:1px solid var(--line)}
+  .chain-cap{font-family:"IBM Plex Mono";font-size:11.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--faint);margin:0 0 18px}
+  .chain{display:flex;align-items:stretch;width:100%;
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+  .node{flex:1 1 0;min-width:0;padding:20px 16px;position:relative;text-align:center}
+  .node + .node{border-left:1px dashed var(--line)}
+  .node .ic{font-family:"IBM Plex Mono";font-size:11px;color:var(--data);
+    letter-spacing:.1em;margin-bottom:9px}
+  .node h4{font-family:"Chakra Petch";font-weight:600;font-size:15px;margin:0 0 4px}
+  .node small{display:block;color:var(--muted);font-size:12.5px;line-height:1.4}
+  .node .glyph{font-size:22px;margin-bottom:8px;filter:saturate(.8)}
+  .pulse{position:absolute;top:0;left:0;height:2px;width:100%;
+    background:linear-gradient(90deg,transparent,var(--sig),transparent);
+    opacity:0;animation:run 6s linear infinite}
+  .node:nth-child(1) .pulse{animation-delay:0s}
+  .node:nth-child(2) .pulse{animation-delay:1.2s}
+  .node:nth-child(3) .pulse{animation-delay:2.4s}
+  .node:nth-child(4) .pulse{animation-delay:3.6s}
+  @keyframes run{0%{opacity:0;transform:translateX(-60%)}8%{opacity:1}
+    50%{opacity:1}92%{opacity:1;transform:translateX(60%)}100%{opacity:0;transform:translateX(60%)}}
+  .link-lbl{display:block;font-family:"IBM Plex Mono";font-size:10.5px;
+    color:var(--sig);letter-spacing:.08em;margin-top:10px}
+
+  /* content */
+  .block{padding:48px 40px;border-bottom:1px solid var(--line)}
+  .step-head{display:flex;align-items:flex-start;gap:18px;margin:0 0 8px}
+  .step-num{font-family:"Chakra Petch";font-weight:700;font-size:14px;color:var(--bg);
+    background:var(--sig);width:34px;height:34px;border-radius:9px;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;margin-top:4px}
+  h2{font-family:"Chakra Petch";font-weight:700;font-size:clamp(23px,3vw,30px);
+    letter-spacing:-.01em;margin:0;line-height:1.15}
+  h2 .sub{display:block;font-family:"IBM Plex Mono";font-size:12px;font-weight:500;
+    color:var(--faint);letter-spacing:.14em;text-transform:uppercase;margin-top:7px}
+  h3{font-family:"Chakra Petch";font-weight:600;font-size:18px;margin:34px 0 12px}
+  .block > p{color:var(--muted);max-width:72ch}
+  .block p strong, li strong{color:var(--txt);font-weight:600}
+  .lead-in{margin-left:52px}
+
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:18px 0 0}
+  ol.steps li{position:relative;padding:0 0 16px 40px;color:var(--muted);max-width:72ch}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:-2px;
+    font-family:"IBM Plex Mono";font-size:12px;color:var(--data);
+    border:1px solid var(--line);border-radius:7px;width:26px;height:26px;
+    display:flex;align-items:center;justify-content:center;background:var(--surface)}
+  ol.steps li:not(:last-child)::after{content:"";position:absolute;left:13px;top:26px;
+    bottom:2px;width:1px;background:var(--line)}
+  ul.plain{padding-left:20px;color:var(--muted)}
+  ul.plain li{margin:6px 0}
+  ul.plain li code{color:var(--sig)}
+
+  /* code */
+  .code{position:relative;margin:16px 0 0;border:1px solid var(--line);
+    border-radius:11px;background:#0C1118;overflow:hidden}
+  .code-bar{display:flex;align-items:center;justify-content:space-between;
+    padding:8px 12px 8px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+  .code-bar .fn{font-family:"IBM Plex Mono";font-size:12px;color:var(--muted)}
+  .copy{font-family:"IBM Plex Mono";font-size:11.5px;color:var(--muted);
+    background:transparent;border:1px solid var(--line);border-radius:6px;
+    padding:4px 10px;cursor:pointer;transition:.15s}
+  .copy:hover{color:var(--sig);border-color:var(--sig-dim)}
+  .copy.ok{color:var(--data);border-color:var(--data)}
+  pre{margin:0;padding:15px 16px;overflow-x:auto;font-size:13.3px;line-height:1.7}
+  pre code{color:#cdd6e0}
+  .tok-c{color:var(--faint)}.tok-p{color:var(--sig)}.tok-s{color:var(--data)}.tok-k{color:#c792ea}
+
+  /* fields */
+  .fields{list-style:none;padding:0;margin:18px 0 0;border:1px solid var(--line);
+    border-radius:12px;overflow:hidden}
+  .fields li{display:grid;grid-template-columns:230px 1fr;border-top:1px solid var(--line-soft);font-size:14.5px}
+  .fields li:first-child{border-top:none}
+  .fields .k{background:var(--surface);padding:11px 16px;color:var(--muted);
+    font-family:"IBM Plex Mono";font-size:13px;border-right:1px solid var(--line)}
+  .fields .v{padding:11px 16px;color:var(--txt)}
+  .fields .v code{color:var(--sig);background:rgba(255,182,39,.08);padding:2px 7px;border-radius:5px;font-size:13px}
+
+  /* tables */
+  .tbl-scroll{overflow-x:auto;margin-top:18px;border:1px solid var(--line);border-radius:12px}
+  table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+  thead th{text-align:left;font-family:"IBM Plex Mono";font-size:11.5px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--faint);padding:12px 16px;background:var(--surface);
+    border-bottom:1px solid var(--line)}
+  tbody td{padding:11px 16px;border-bottom:1px solid var(--line-soft);color:var(--muted)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody td:first-child{color:var(--data);font-family:"IBM Plex Mono";font-size:13px}
+  tbody td b{color:var(--txt);font-weight:600}
+  tbody td code{color:var(--sig);font-size:12.5px}
+
+  /* callouts */
+  .note{display:flex;gap:13px;margin:20px 0 0;padding:14px 16px;border-radius:11px;
+    background:var(--surface);border:1px solid var(--line);font-size:14px;color:var(--muted)}
+  .note .tag{font-family:"IBM Plex Mono";font-size:11px;letter-spacing:.1em;
+    text-transform:uppercase;flex:0 0 auto;font-weight:600}
+  .note.tip{border-left:3px solid var(--data)}.note.tip .tag{color:var(--data)}
+  .note.warn{border-left:3px solid var(--sig)}.note.warn .tag{color:var(--sig)}
+  .note.stop{border-left:3px solid var(--danger)}.note.stop .tag{color:var(--danger)}
+  .note code{color:var(--txt);background:#0C1118;padding:1px 6px;border-radius:4px;font-size:13px}
+
+  footer{padding:40px;color:var(--faint);font-size:13px}
+  footer .mono{color:var(--muted)}
+
+  .menu-btn{display:none}
+  @media(max-width:920px){
+    .shell{grid-template-columns:1fr}
+    aside{position:fixed;z-index:40;top:0;left:0;width:84vw;max-width:320px;height:100vh;
+      background:var(--bg);transform:translateX(-102%);transition:transform .25s ease;
+      box-shadow:30px 0 60px rgba(0,0,0,.5)}
+    aside.open{transform:translateX(0)}
+    .menu-btn{display:flex;position:fixed;z-index:50;top:14px;left:14px;align-items:center;
+      gap:9px;background:var(--surface);border:1px solid var(--line);color:var(--txt);
+      border-radius:10px;padding:9px 13px;cursor:pointer;font-family:"IBM Plex Mono";font-size:13px}
+    .scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:35}
+    .scrim.open{display:block}
+    header.hero{padding-top:74px}
+    .block,.chain-wrap,header.hero,footer{padding-left:22px;padding-right:22px}
+    .lead-in{margin-left:0}
+    .chain{flex-direction:column}
+    .node + .node{border-left:none;border-top:1px dashed var(--line)}
+    .fields li{grid-template-columns:1fr}
+    .fields .k{border-right:none;border-bottom:1px solid var(--line)}
+  }
+  @media(prefers-reduced-motion:reduce){.pulse{animation:none;opacity:.4}html{scroll-behavior:auto}}
+  :focus-visible{outline:2px solid var(--sig);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+
+<button class="menu-btn" id="menuBtn" aria-label="Open navigation">☰ Steps</button>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+  <aside id="aside">
+    <div class="brand">
+      <span class="dot"></span>
+      <div><b>JEEPBOT&nbsp;v6</b><small>setup&nbsp;guide</small></div>
+    </div>
+    <nav class="toc" id="toc">
+      <a href="#overview"><span class="n">00</span><span>Overview</span></a>
+      <a href="#hardware"><span class="n">·</span><span>Hardware &amp; parts</span></a>
+      <a href="#quickstart"><span class="n">·</span><span>Fresh start (TL;DR)</span></a>
+      <div class="toc-sep"></div>
+      <a href="#env"><span class="n">01</span><span>Environment &amp; clone</span></a>
+      <a href="#install"><span class="n">02</span><span>Install requirements</span></a>
+      <a href="#config"><span class="n">03</span><span>Configure myconfig.py</span></a>
+      <a href="#drive"><span class="n">04</span><span>Drive</span></a>
+      <a href="#train"><span class="n">05</span><span>Record &amp; train</span></a>
+      <div class="toc-sep"></div>
+      <a href="#modes"><span class="n">·</span><span>Drive modes</span></a>
+      <a href="#reference"><span class="n">·</span><span>Command reference</span></a>
+      <a href="#troubleshooting"><span class="n">·</span><span>Troubleshooting</span></a>
+    </nav>
+    <div class="ghlink">Source on <a href="../">GitHub</a></div>
+  </aside>
+
+  <main>
+    <header class="hero" id="top">
+      <p class="eyebrow">Autonomous RC platform · v6</p>
+      <h1>Get JeepBot driving from a <span class="acc">fresh Pi</span> — then teach it to drive itself.</h1>
+      <p class="lede">A clean-slate setup guide: stand up the Python environment, clone the repo, install the requirements, point the config at your hardware, and run one command. Then record laps, train a pilot, and hand over the wheel.</p>
+      <div class="meta-row">
+        <span class="chip">Launch <b>python3 myconfig.py drive</b></span>
+        <span class="chip">Drive <span class="data">dual VESC</span></span>
+        <span class="chip">See <span class="data">2× OAK-D Pro</span></span>
+        <span class="chip">Pilot <span class="data">Keras CNN</span></span>
+      </div>
+    </header>
+
+    <!-- signature: runtime chain -->
+    <div class="chain-wrap">
+      <p class="chain-cap">// what runs when you type `myconfig.py drive`</p>
+      <div class="chain" role="img" aria-label="Runtime flow: controller to drive loop to VESCs and cameras to web UI and AI pilot">
+        <div class="node"><span class="pulse"></span>
+          <div class="glyph">🎮</div><div class="ic">INPUT</div>
+          <h4>Controller</h4><small>F710 or RadioMaster</small>
+          <span class="link-lbl">pygame axes</span>
+        </div>
+        <div class="node"><span class="pulse"></span>
+          <div class="glyph">🧠</div><div class="ic">LOOP</div>
+          <h4>Drive loop · Pi</h4><small>jeepbot_drive @ 100&nbsp;Hz</small>
+          <span class="link-lbl">threads fan out</span>
+        </div>
+        <div class="node"><span class="pulse"></span>
+          <div class="glyph">⚙️</div><div class="ic">ACT + SEE</div>
+          <h4>VESC ×2 · OAK-D ×2</h4><small>steer + drive + vision</small>
+          <span class="link-lbl">serial + depthai</span>
+        </div>
+        <div class="node"><span class="pulse"></span>
+          <div class="glyph">🛰️</div><div class="ic">SUPERVISE</div>
+          <h4>Web UI + Pilot</h4><small>:8887 · CNN model</small>
+          <span class="link-lbl">mode control</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- overview -->
+    <section id="overview" class="block">
+      <h2>Overview <span class="sub">What you're setting up</span></h2>
+      <p style="margin-top:18px">JeepBot is a dual-VESC autonomous RC platform. One VESC <strong>steers</strong> (a motor + encoder driven by position commands), the other <strong>drives</strong> the wheels (duty-cycle). An OAK-D Pro camera and a Flask web UI run as in-process threads of the drive loop, recorded data lands in a <code class="mono">tub/</code>, and a trained CNN can take over steering or full driving.</p>
+      <p>The whole thing launches from a single command — <code class="mono">python3 myconfig.py drive</code> — which reads <code class="mono">myconfig.py</code> for every hardware-specific value. A fresh start is five sequential steps:</p>
+      <ol class="steps">
+        <li><strong>Environment &amp; clone</strong> — a Python virtualenv and the repo.</li>
+        <li><strong>Install requirements</strong> — runtime deps on the Pi, training deps on your laptop.</li>
+        <li><strong>Configure</strong> — serial ports, controller, cameras in <code class="mono">myconfig.py</code>.</li>
+        <li><strong>Drive</strong> — run it, open the web UI, check your controls.</li>
+        <li><strong>Record &amp; train</strong> — collect laps, train a pilot, deploy it back.</li>
+      </ol>
+    </section>
+
+    <!-- hardware -->
+    <section id="hardware" class="block">
+      <h2>Hardware &amp; parts <span class="sub">What's on the car</span></h2>
+      <ul class="plain" style="margin-top:18px">
+        <li><strong>Raspberry Pi</strong> — runs the drive loop, cameras, and web server</li>
+        <li><strong>2× VESC</strong> — one for steering (motor + encoder, position control), one for drive (duty-cycle, 4WD)</li>
+        <li><strong>2× OAK-D Pro</strong> — front and rear depth cameras</li>
+        <li><strong>Controller</strong> — Logitech F710 (USB dongle) or a RadioMaster radio via an Arduino Leonardo</li>
+      </ul>
+      <div class="note tip"><span class="tag">RadioMaster?</span><span>If you're driving with the ExpressLRS radio instead of the F710, flash the TX/RX and the Leonardo first — that's covered in the separate ELRS controller guide. Then set <code>CONTROLLER = "radiomaster"</code> here.</span></div>
+    </section>
+
+    <!-- quickstart -->
+    <section id="quickstart" class="block">
+      <h2>Fresh start <span class="sub">The whole thing, condensed</span></h2>
+      <p style="margin-top:18px">If you've done this before, here's the entire fresh-Pi sequence. Each step is explained in full below.</p>
+      <div class="code">
+        <div class="code-bar"><span class="fn">raspberry pi · terminal</span><button class="copy">Copy</button></div>
+<pre><code><span class="tok-c"># 1. Python environment</span>
+python3 <span class="tok-p">-m</span> venv ~/jeepbot-env
+<span class="tok-k">source</span> ~/jeepbot-env/bin/activate
+
+<span class="tok-c"># 2. Clone the repo</span>
+git clone <span class="tok-p">https://github.com/KennethKhant/JeepBot-SetUp.git</span> myjeepbot
+<span class="tok-k">cd</span> myjeepbot
+
+<span class="tok-c"># 3. Runtime requirements + bundled PyVESC</span>
+pip install <span class="tok-p">-r</span> requirements_pi.txt
+pip install <span class="tok-p">-e</span> .
+
+<span class="tok-c"># 4. Check ports / controller / cameras</span>
+nano myconfig.py
+
+<span class="tok-c"># 5. Drive</span>
+python3 myconfig.py drive</code></pre>
+      </div>
+      <p style="margin-top:20px">Then open <a href="#">http://&lt;pi-ip&gt;:8887</a> for the front camera and controls, and <code class="mono">:8888</code> for the rear.</p>
+    </section>
+
+    <!-- 01 env -->
+    <section id="env" class="block">
+      <div class="step-head"><span class="step-num">01</span>
+        <h2>Environment &amp; clone <span class="sub">venv + git</span></h2></div>
+      <div class="lead-in">
+        <p>Always work inside a virtual environment so JeepBot's dependencies stay separate from the system Python.</p>
+        <div class="code">
+          <div class="code-bar"><span class="fn">terminal</span><button class="copy">Copy</button></div>
+<pre><code>python3 <span class="tok-p">-m</span> venv ~/jeepbot-env
+<span class="tok-k">source</span> ~/jeepbot-env/bin/activate
+
+git clone <span class="tok-p">https://github.com/KennethKhant/JeepBot-SetUp.git</span> myjeepbot
+<span class="tok-k">cd</span> myjeepbot</code></pre>
+        </div>
+        <div class="note tip"><span class="tag">Every terminal</span><span>You have to <code>source ~/jeepbot-env/bin/activate</code> in each new shell before running JeepBot. Add that line to the end of <code>~/.bashrc</code> to activate it automatically on login.</span></div>
+        <p style="margin-top:20px">The repo is <strong>code only</strong> — recorded <code class="mono">tub/</code> images and trained <code class="mono">models/</code> aren't committed (just <code class="mono">.gitkeep</code> placeholders), so the clone is small and you begin with an empty data set.</p>
+      </div>
+    </section>
+
+    <!-- 02 install -->
+    <section id="install" class="block">
+      <div class="step-head"><span class="step-num">02</span>
+        <h2>Install requirements <span class="sub">pip</span></h2></div>
+      <div class="lead-in">
+        <p>Which file you install depends on the machine's job.</p>
+        <h3>On the Raspberry Pi — runtime</h3>
+        <div class="code">
+          <div class="code-bar"><span class="fn">raspberry pi · terminal</span><button class="copy">Copy</button></div>
+<pre><code>pip install <span class="tok-p">-r</span> requirements_pi.txt
+pip install <span class="tok-p">-e</span> .</code></pre>
+        </div>
+        <p style="margin-top:14px"><code class="mono">requirements_pi.txt</code> pulls in <code class="mono">pygame</code>, <code class="mono">pyserial</code>, <code class="mono">flask</code>, <code class="mono">numpy</code>, <code class="mono">opencv-python</code>, and <code class="mono">depthai</code> (the OAK-D driver). The <code class="mono">pip install -e .</code> registers the bundled <strong>PyVESC</strong> so the drive script can <code class="mono">import pyvesc</code> — do this once per environment.</p>
+        <h3>On your laptop / desktop / Jetson — training</h3>
+        <div class="code">
+          <div class="code-bar"><span class="fn">training machine · terminal</span><button class="copy">Copy</button></div>
+<pre><code>pip install <span class="tok-p">-r</span> requirements_train.txt</code></pre>
+        </div>
+        <p style="margin-top:14px">This installs <code class="mono">numpy</code>, <code class="mono">opencv-python</code>, and <code class="mono">tensorflow</code> for <code class="mono">jeep_train.py</code>.</p>
+        <div class="note warn"><span class="tag">Running AI on the Pi</span><span>The Pi requirements have no TensorFlow — the Pi normally only <em>runs</em> the model. If you intend to run <code>auto_steering</code> / <code>full_drive</code> directly on the Pi, you may need to install TensorFlow there too.</span></div>
+      </div>
+    </section>
+
+    <!-- 03 config -->
+    <section id="config" class="block">
+      <div class="step-head"><span class="step-num">03</span>
+        <h2>Configure myconfig.py <span class="sub">Everything hardware-specific</span></h2></div>
+      <div class="lead-in">
+        <p>On a fresh machine, confirm these before driving.</p>
+
+        <h3>Serial ports (VESCs)</h3>
+        <ul class="fields">
+          <li><span class="k">DEFAULT_STEERING_PORT</span><span class="v"><code>/dev/ttyACM1</code></span></li>
+          <li><span class="k">DEFAULT_DRIVE_PORT</span><span class="v"><code>/dev/ttyACM0</code></span></li>
+        </ul>
+        <p style="margin-top:14px"><code class="mono">ACM0</code>/<code class="mono">ACM1</code> can swap on reboot or by plug order. List what's connected, and test wiring safely without opening the VESC ports using a dry run:</p>
+        <div class="code">
+          <div class="code-bar"><span class="fn">terminal</span><button class="copy">Copy</button></div>
+<pre><code><span class="tok-c"># which serial ports exist</span>
+python3 myconfig.py drive <span class="tok-p">--list-ports</span>
+
+<span class="tok-c"># read the controller without touching the motors</span>
+python3 myconfig.py drive <span class="tok-p">--dry-run</span></code></pre>
+        </div>
+        <p style="margin-top:14px">If steering and drive are reversed, swap the two port values (or replug).</p>
+
+        <h3>Controller</h3>
+        <ul class="fields">
+          <li><span class="k">CONTROLLER</span><span class="v"><code>"f710"</code> or <code>"radiomaster"</code></span></li>
+        </ul>
+        <p style="margin-top:14px">Both profiles live in <code class="mono">controller_profiles.py</code>. If sticks map to the wrong axis, find the right indices by wiggling one control at a time and reading which index changes:</p>
+        <div class="code">
+          <div class="code-bar"><span class="fn">terminal</span><button class="copy">Copy</button></div>
+<pre><code>python3 controller_axes_test.py</code></pre>
+        </div>
+        <p style="margin-top:14px">Then set <code class="mono">steering_axis</code> / <code class="mono">drive_axis</code> / <code class="mono">deadman_button</code> in that controller's profile.</p>
+        <div class="note stop"><span class="tag">Deadman</span><span>The deadman button must be <strong>held</strong> for any command to be sent — releasing it stops the car. That's intentional. Don't disable it on the bench unless you mean to.</span></div>
+
+        <h3>Cameras (OAK-D Pro)</h3>
+        <ul class="fields">
+          <li><span class="k">SWAP_CAMERAS</span><span class="v"><code>True</code> — flip if front/rear are reversed</span></li>
+          <li><span class="k">FRONT_CAMERA_MXID</span><span class="v"><code>""</code> — pin to a serial for reliability</span></li>
+          <li><span class="k">REAR_CAMERA_MXID</span><span class="v"><code>""</code></span></li>
+        </ul>
+        <p style="margin-top:14px">With two OAK-D cameras, discovery order isn't guaranteed across reboots. The robust fix is to pin each camera to its serial (MxId). List the connected serials:</p>
+        <div class="code">
+          <div class="code-bar"><span class="fn">terminal</span><button class="copy">Copy</button></div>
+<pre><code>python3 <span class="tok-p">-c</span> <span class="tok-s">"import depthai as dai; print([d.getMxId() for d in dai.Device.getAllAvailableDevices()])"</span></code></pre>
+        </div>
+        <p style="margin-top:14px">Paste them into <code class="mono">FRONT_CAMERA_MXID</code> / <code class="mono">REAR_CAMERA_MXID</code>.</p>
+
+        <h3>YOLO overlay (optional)</h3>
+        <p>YOLO runs from its <strong>own</strong> virtualenv (ultralytics is heavy, kept separate). Activate it before driving if you want detection; otherwise set <code class="mono">ENABLE_YOLO_DETECTION = False</code>.</p>
+        <div class="code">
+          <div class="code-bar"><span class="fn">terminal</span><button class="copy">Copy</button></div>
+<pre><code><span class="tok-k">source</span> /home/jeepbot/yolo-test/bin/activate</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 drive -->
+    <section id="drive" class="block">
+      <div class="step-head"><span class="step-num">04</span>
+        <h2>Drive <span class="sub">One command</span></h2></div>
+      <div class="lead-in">
+        <div class="code">
+          <div class="code-bar"><span class="fn">raspberry pi · terminal</span><button class="copy">Copy</button></div>
+<pre><code>python3 myconfig.py drive</code></pre>
+        </div>
+        <p style="margin-top:16px">A live status line shows the deadman state, current mode, steering angle, and drive duty. Open the camera streams in a browser on the same network:</p>
+        <ul class="plain">
+          <li>Front camera + controls — <code>http://&lt;pi-ip&gt;:8887</code></li>
+          <li>Rear camera — <code>http://&lt;pi-ip&gt;:8888</code></li>
+        </ul>
+        <p style="margin-top:14px">Switch drive modes from the web UI. See the <a href="#modes">drive modes</a> table for what each one does.</p>
+      </div>
+    </section>
+
+    <!-- 05 train -->
+    <section id="train" class="block">
+      <div class="step-head"><span class="step-num">05</span>
+        <h2>Record &amp; train <span class="sub">Teach it to drive</span></h2></div>
+      <div class="lead-in">
+        <p class="chain-cap" style="margin-bottom:18px">// record → train → deploy → drive — repeat to improve</p>
+        <div class="chain" role="img" aria-label="Workflow: record laps, copy tub, train model, deploy back">
+          <div class="node"><div class="glyph">🔴</div><div class="ic">RECORD</div><h4>Drive in <code style="color:var(--sig)">record</code></h4><small>laps saved to tub/</small></div>
+          <div class="node"><div class="glyph">📂</div><div class="ic">COPY</div><h4>scp the tub</h4><small>Pi → laptop</small></div>
+          <div class="node"><div class="glyph">🧠</div><div class="ic">TRAIN</div><h4>jeep_train.py</h4><small>builds the CNN</small></div>
+          <div class="node"><div class="glyph">🚀</div><div class="ic">DEPLOY</div><h4>scp the model</h4><small>laptop → Pi</small></div>
+        </div>
+
+        <h3>1. Record on the Pi</h3>
+        <p>Drive in <strong>record</strong> mode. Each run creates a timestamped session under <code class="mono">tub/</code> (e.g. <code class="mono">tub/session_20260602_191728/</code>) with images and the matching steering/throttle values. Collect varied, clean laps — the model only learns what you show it.</p>
+
+        <h3>2. Copy the tub to your training machine</h3>
+        <div class="code">
+          <div class="code-bar"><span class="fn">laptop · terminal</span><button class="copy">Copy</button></div>
+<pre><code>scp <span class="tok-p">-r</span> jeepbot@&lt;pi-ip&gt;:~/myjeepbot/tub ./tub</code></pre>
+        </div>
+
+        <h3>3. Train</h3>
+        <div class="code">
+          <div class="code-bar"><span class="fn">laptop · terminal</span><button class="copy">Copy</button></div>
+<pre><code><span class="tok-c"># train on everything in tub/</span>
+python3 jeep_train.py <span class="tok-p">--tub</span> tub <span class="tok-p">--model</span> models/jeep_pilot.keras
+
+<span class="tok-c"># train on a single session</span>
+python3 jeep_train.py <span class="tok-p">--tub</span> tub/session_20260521_200737 <span class="tok-p">--model</span> models/jeep_pilot.keras
+
+<span class="tok-c"># fine-tune an existing model</span>
+python3 jeep_train.py <span class="tok-p">--tub</span> tub <span class="tok-p">--model</span> models/jeep_pilot.keras <span class="tok-p">--base</span> models/jeep_pilot.keras</code></pre>
+        </div>
+        <p style="margin-top:14px">Flags: <code class="mono">--epochs</code> (default 100), <code class="mono">--batch</code> (64), <code class="mono">--val-split</code> (0.15), <code class="mono">--no-aug</code> to disable augmentation.</p>
+
+        <h3>4. Deploy the model back to the Pi</h3>
+        <div class="code">
+          <div class="code-bar"><span class="fn">laptop · terminal</span><button class="copy">Copy</button></div>
+<pre><code>scp models/jeep_pilot.keras jeepbot@&lt;pi-ip&gt;:~/myjeepbot/models/</code></pre>
+        </div>
+        <p style="margin-top:14px">The drive script loads <code class="mono">DEFAULT_MODEL_PATH = "models/jeep_pilot.keras"</code>. Switch to <code class="mono">auto_steering</code> or <code class="mono">full_drive</code> in the web UI to let it take over.</p>
+        <div class="note stop"><span class="tag">First runs</span><span>Keep your hand on the deadman button the first few autonomous runs. Release it and the car stops.</span></div>
+      </div>
+    </section>
+
+    <!-- modes -->
+    <section id="modes" class="block">
+      <h2>Drive modes <span class="sub">Set from the web UI</span></h2>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>Mode</th><th>Steering</th><th>Throttle</th><th>Recording</th></tr></thead>
+          <tbody>
+            <tr><td>manual</td><td><b>you</b></td><td><b>you</b></td><td>no</td></tr>
+            <tr><td>record</td><td><b>you</b></td><td><b>you</b></td><td><b style="color:var(--sig)">yes → tub/</b></td></tr>
+            <tr><td>auto_steering</td><td><b>AI model</b></td><td><b>you</b></td><td>no</td></tr>
+            <tr><td>full_drive</td><td><b>AI model</b></td><td><b>AI model</b></td><td>no</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:16px">The starting mode is <code class="mono">DEFAULT_DRIVE_MODE = "manual"</code>.</p>
+    </section>
+
+    <!-- reference -->
+    <section id="reference" class="block">
+      <h2>Command reference <span class="sub">Everything in one place</span></h2>
+      <div class="tbl-scroll">
+        <table>
+          <thead><tr><th>Task</th><th>Command</th></tr></thead>
+          <tbody>
+            <tr><td>Activate env</td><td><code>source ~/jeepbot-env/bin/activate</code></td></tr>
+            <tr><td>Install (Pi)</td><td><code>pip install -r requirements_pi.txt &amp;&amp; pip install -e .</code></td></tr>
+            <tr><td>Install (train)</td><td><code>pip install -r requirements_train.txt</code></td></tr>
+            <tr><td>List serial ports</td><td><code>python3 myconfig.py drive --list-ports</code></td></tr>
+            <tr><td>Dry run (no VESC)</td><td><code>python3 myconfig.py drive --dry-run</code></td></tr>
+            <tr><td>Find controller axes</td><td><code>python3 controller_axes_test.py</code></td></tr>
+            <tr><td>List camera serials</td><td><code>python3 -c "import depthai as dai; ..."</code></td></tr>
+            <tr><td>Drive</td><td><code>python3 myconfig.py drive</code></td></tr>
+            <tr><td>Train</td><td><code>python3 jeep_train.py --tub tub --model models/jeep_pilot.keras</code></td></tr>
+            <tr><td>Front camera</td><td><code>http://&lt;pi-ip&gt;:8887</code></td></tr>
+            <tr><td>Rear camera</td><td><code>http://&lt;pi-ip&gt;:8888</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- troubleshooting -->
+    <section id="troubleshooting" class="block" style="border-bottom:none">
+      <h2>Troubleshooting <span class="sub">When it doesn't just work</span></h2>
+
+      <h3>could not open port /dev/ttyACM0</h3>
+      <p>The VESC isn't on that port. Run <code class="mono">--list-ports</code>, update <code class="mono">DEFAULT_DRIVE_PORT</code> / <code class="mono">DEFAULT_STEERING_PORT</code>, and check the cable. You may also need permission — add yourself to the <code class="mono">dialout</code> group with <code class="mono">sudo usermod -aG dialout $USER</code>, then log out and back in.</p>
+
+      <h3>Car doesn't move / no commands sent</h3>
+      <p>You're not holding the deadman button, or its index is wrong for your controller. Confirm with <code class="mono">controller_axes_test.py</code> and set <code class="mono">deadman_button</code> in the controller profile.</p>
+
+      <h3>Steering goes the wrong way</h3>
+      <p>Set <code class="mono">invert_steering</code> (or <code class="mono">invert_drive</code>) in the controller profile, or flip <code class="mono">DEFAULT_INVERT_STEERING</code> in <code class="mono">myconfig.py</code>.</p>
+
+      <h3>Front/rear cameras swapped</h3>
+      <p>Toggle <code class="mono">SWAP_CAMERAS</code>, or pin both with <code class="mono">FRONT_CAMERA_MXID</code> / <code class="mono">REAR_CAMERA_MXID</code>.</p>
+
+      <h3>No camera found / DepthAI errors</h3>
+      <p>Only one process can hold an OAK-D at a time. Make sure no other script (or a crashed previous run) is still using it — the camera and web server are meant to run as in-process threads of the drive loop, not as separate processes.</p>
+
+      <h3>AI modes do nothing</h3>
+      <p><code class="mono">DEFAULT_MODEL_PATH</code> points at a model that doesn't exist yet. Train one and copy it to <code class="mono">models/jeep_pilot.keras</code>.</p>
+    </section>
+
+    <footer>
+      <div class="mono">JeepBot v6 · setup guide</div>
+      <div style="margin-top:6px">One command — <code class="mono" style="color:var(--sig)">python3 myconfig.py drive</code> — runs the loop, both VESCs, both cameras, and the web UI. Record, train, and let the pilot take over.</div>
+    </footer>
+  </main>
+</div>
+
+<script>
+  document.querySelectorAll('.copy').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var pre = btn.closest('.code').querySelector('pre');
+      var text = pre.innerText.replace(/^\s*#.*$/gm, function(m){return m;}).trim();
+      navigator.clipboard.writeText(text).then(function(){
+        var old = btn.textContent; btn.textContent='Copied'; btn.classList.add('ok');
+        setTimeout(function(){ btn.textContent=old; btn.classList.remove('ok'); },1400);
+      });
+    });
+  });
+  var aside=document.getElementById('aside'), scrim=document.getElementById('scrim'), mb=document.getElementById('menuBtn');
+  function toggle(open){ aside.classList.toggle('open',open); scrim.classList.toggle('open',open); }
+  mb.addEventListener('click',function(){ toggle(!aside.classList.contains('open')); });
+  scrim.addEventListener('click',function(){ toggle(false); });
+  var links=[].slice.call(document.querySelectorAll('#toc a'));
+  var map={}; links.forEach(function(a){ map[a.getAttribute('href').slice(1)]=a; });
+  var obs=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){ if(e.isIntersecting){
+      links.forEach(function(l){ l.classList.remove('active'); });
+      if(map[e.target.id]) map[e.target.id].classList.add('active');
+    }});
+  },{rootMargin:'-20% 0px -72% 0px'});
+  document.querySelectorAll('main section[id]').forEach(function(s){ obs.observe(s); });
+  links.forEach(function(a){ a.addEventListener('click',function(){ if(window.innerWidth<=920) toggle(false); }); });
+</script>
+</body>
+</html>

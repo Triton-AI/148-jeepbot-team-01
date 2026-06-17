@@ -1,78 +1,146 @@
 # 🚗 JeepBot | ECE/MAE 148 — Team 01
 
-> PowerWheels Jeep retrofitted with VESCs, Raspberry Pi 5, OAK-D cameras, and LiDAR — built as a platform for autonomous robotics development.  
-> **UC San Diego — Jacobs School of Engineering**  
+PowerWheels Jeep converted into a modular robotics platform for autonomous vehicle development, hardware integration, and controls experimentation.
+
+Developed through UC San Diego ECE/MAE 148 in collaboration with Triton AI.
 
 ---
 
 ## ⚡ Overview
 
-JeepBot is a modular robotics platform designed for:
-- Embedded systems development
-- Autonomous driving experiments
-- Sensor integration (vision, LiDAR, GPS)
+JeepBot is designed as a scalable and reproducible robotics platform combining:
 
-The system combines:
-- Raspberry Pi (control + processing)
-- VESC motor controllers (actuation)
-- Multi-sensor perception stack
+- Raspberry Pi 5 for onboard computing and control
+- VESC motor controllers for vehicle actuation
+- OAK-D cameras for computer vision
+- LiDAR and additional sensors for autonomous navigation
+- ExpressLRS controller integration for manual control and testing
+
+The project combines electrical integration, embedded systems, mechanical design, and software development.
 
 ---
 
-## 🚧 Current Status
+## 🔧 Hardware Development
 
-- ✅ Fully assembled (hardware + wiring)
-- ✅ VESCs configured and tested
-- ❌ No full-system control (Pi ↔ VESC not implemented)
-- ❌ Robot does not move yet
+A major focus of this project was creating a clean, organized, and maintainable electronics architecture.
 
-Main blockers:
-- CAN control from Raspberry Pi
-- Broken antispark switch (safety issue)
-- LiDAR power issue
-- Steering encoder integration
+The system went through multiple hardware iterations:
+
+### Version 1
+
+- Initial full-scale architecture
+- Designed around 5 VESC motor controllers
+- More complex wiring system supporting multiple independent vehicle subsystems
+
+### Version 2
+
+- Simplified architecture using 2 VESC motor controllers
+- Reduced wiring complexity
+- Improved reliability and maintainability
+- Redesigned to make the platform easier for future robotics students to reproduce, debug, and expand
+
+The Version 2 redesign prioritizes accessibility while keeping the system expandable for future development.
+
+Documentation for both versions:
+
+`docs/version1/`
+
+`docs/version2/`
+
+---
+
+## 📡 ELRS Controller Integration
+
+The project includes development of a RadioMaster ExpressLRS controller interface for JeepBot testing and operation.
+
+This allows manual control and testing during the development process while supporting future autonomous features.
+
+Documentation and implementation:
+
+`docs/elrs_controller/`
 
 ---
 
 ## 🧠 System Architecture
 
-RC Controller → Receiver → Raspberry Pi → CAN → VESCs → Motors  
-Sensors → Raspberry Pi → Processing
+Control pipeline:
+
+ExpressLRS Controller  
+↓  
+Receiver  
+↓  
+Raspberry Pi 5  
+↓  
+VESC Motor Controllers  
+↓  
+Motors / Steering  
+
+Sensor pipeline:
+
+OAK-D Cameras + LiDAR  
+↓  
+Raspberry Pi 5  
+↓  
+Autonomous Processing Stack  
 
 ---
 
-## 📂 Documentation
+## 📂 Repository Structure
 
-Full technical documentation is available in `/docs`:
+CAD/
 
-- Overview → docs/overview.md  
-- Hardware → docs/hardware.md  
-- Software → docs/software.md  
-- Current Status → docs/current_status.md  
-- Mechanical Mounts → docs/mechanical_mounts.md  
-- Bill of Materials → docs/bill_of_materials.md  
-- Progress & Logs → docs/progress_logs.md  
-- Troubleshooting → docs/troubleshooting.md  
-- System Schematic → docs/system_schematic.md  
-- Setup Guide → setup/setup_guide.md   
+- electronics/
+- mechanical/
+- sensors/
 
----
+docs/
 
-## 📸 Media
+- setup/
+- version1/
+- version2/
+- elrs_controller/
 
-Images and system visuals are stored in:
+src/
 
-docs/media/
+- jeepbot/
+- camera/
+- tests/
 
 ---
 
-## 🚀 Next Steps
+## 📚 Documentation
 
-- Implement CAN control (Pi → VESC)
-- Fix power system issues
-- Integrate sensors (cameras, LiDAR)
-- Enable teleoperation
-- Move toward autonomy
+Technical documentation includes:
+
+- Wiring diagrams
+- Hardware revisions
+- Raspberry Pi setup
+- DepthAI/OAK-D setup
+- ELRS controller integration
+- Mechanical and electrical references
+
+Main documentation:
+
+`docs/`
+
+---
+
+## 🚧 Current Development Status
+
+Completed:
+
+✅ Vehicle hardware assembly  
+✅ Electronics mounting and organization  
+✅ VESC setup and configuration  
+✅ Hardware architecture redesign (Version 1 → Version 2)  
+✅ Documentation consolidation  
+
+Ongoing:
+
+- Continued software integration
+- Sensor integration and testing
+- Autonomous control development
+- Future expansion toward the original 5-VESC architecture
 
 ---
 
@@ -80,10 +148,3 @@ docs/media/
 
 ECE/MAE 148 — UC San Diego  
 Triton AI
-
----
-
-## 📎 Resources
-
-- Final Presentation → docs/ECE_MAE_148_Project_Final_Presentation.pdf  
-- System Schematic → https://ucsdcloud-my.sharepoint.com/:u:/g/personal/kebraun_ucsd_edu/IQCRasxiZergSodErnQQG6UNAVxrW2Y3mB9if8TZqUndJ9E?e=tebVNc

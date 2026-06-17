@@ -1,0 +1,10 @@
+# ================================================
+# Install on the Raspberry Pi (runtime only)
+# pip install -r requirements_pi.txt
+# ================================================
+pygame
+pyserial
+flask
+numpy
+opencv-python
+depthai
